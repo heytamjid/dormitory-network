@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from .forms import SignUpForm, LoginForm
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 
 
 
@@ -51,3 +52,30 @@ def dashboard (request):
     return render (request, 'firstApp/dashboard.html', {
         'username' : username,
     })
+    
+    
+    
+@login_required
+def start_timer(request):
+    start_time = timezone.now()
+    request.session['start_time'] = start_time.timestamp() 
+    return HttpResponse("<button type='submit' id='endTimerButton' hx-get='/endTimerClicked/' hx-target='#endTimerButton' hx-swap='outerHTML'> Stop Tracking </button>")
+
+@login_required
+def stop_timer(request):
+    # Stop the timer and calculate the duration
+    end_time = timezone.now().timestamp()
+    start_time = request.session['start_time']
+    duration = (end_time - start_time)
+    print (start_time)
+    print(end_time)
+    print(duration)
+    #OK EI PORJONTO
+
+    # Create a TrackedTime instance
+    #TrackedTime.objects.create(user=request.user, start_time=start_time, end_time=end_time, duration=timezone.timedelta(seconds=duration))
+
+    # Clear start_time from session after using it
+    del request.session['start_time']
+
+    return HttpResponse("<button type='submit' id='startTimerButton' hx-get='/startTimerClicked/' hx-target='#startTimerButton' hx-swap='outerHTML'> Start Tracking </button>")

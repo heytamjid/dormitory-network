@@ -9,7 +9,8 @@ urlpatterns = [
     path('login/', views.loginFunc, name = "login"),
     path('logout/', views.logoutFunc, name = "logout"),
     path('dashboard/', views.dashboard, name = "dashboard"),
+    path('startTimerClicked/', views.start_timer, name = "startTimerClicked"),
+    path('endTimerClicked/', views.stop_timer, name = "endTimerClicked"),
 
-    
     
 ]
