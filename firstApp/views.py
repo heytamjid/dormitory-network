@@ -4,7 +4,8 @@ from django.contrib.auth import login, authenticate, logout
 from .forms import SignUpForm, LoginForm
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-
+from .models import *
+from datetime import datetime
 
 
 
@@ -54,6 +55,7 @@ def dashboard (request):
     })
     
     
+
     
 @login_required
 def start_timer(request):
@@ -63,19 +65,15 @@ def start_timer(request):
 
 @login_required
 def stop_timer(request):
-    # Stop the timer and calculate the duration
     end_time = timezone.now().timestamp()
     start_time = request.session['start_time']
     duration = (end_time - start_time)
-    print (start_time)
-    print(end_time)
-    print(duration)
-    #OK EI PORJONTO
 
-    # Create a TrackedTime instance
-    #TrackedTime.objects.create(user=request.user, start_time=start_time, end_time=end_time, duration=timezone.timedelta(seconds=duration))
-
-    # Clear start_time from session after using it
+    #TrackedTimeDB te UTC+0 onujayi save ache time. User er timezoneinfo onujayi +- kore user ke show korte hobe
+    TrackedTimeDB.objects.create(user=request.user, startTime=datetime.fromtimestamp(start_time), endTime=datetime.fromtimestamp(end_time), duration=timezone.timedelta(seconds=duration))
     del request.session['start_time']
 
     return HttpResponse("<button type='submit' id='startTimerButton' hx-get='/startTimerClicked/' hx-target='#startTimerButton' hx-swap='outerHTML'> Start Tracking </button>")
+
+#ei porjonto. model e save hocche stop korle.
+#ekhon stop korle dashboard e agergula + save howa entry gulo show korar bebostha korte hobe. 

@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from timezone_field import TimeZoneField
+
 
 # Create your models here.
 
@@ -8,6 +10,7 @@ class myUserDB (AbstractUser):
     #institution = models.TextField(blank = True, null = True)
     bio = models.TextField(blank=True, null=True)
     # interests = will create interest DB
+    timezone = TimeZoneField(default='Asia/Dhaka', null = True) 
     
     def __str__(self):
         return self.username 
