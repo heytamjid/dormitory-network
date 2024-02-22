@@ -11,6 +11,7 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name = "dashboard"),
     path('startTimerClicked/', views.start_timer, name = "startTimerClicked"),
     path('endTimerClicked/', views.stop_timer, name = "endTimerClicked"),
+    path('endTimerClicked/renderEntry/', views.renderEntry, name = "renderEntry"),
 
     
 ]

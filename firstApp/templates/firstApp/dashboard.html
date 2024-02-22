@@ -13,7 +13,7 @@
 
 <h2> Your Tracked Time </h2>
 
-<div class = "trackedTime">
+<div id = "trackedTime" hx-select="#onlyEntries" hx-get="/endTimerClicked/renderEntry/" hx-trigger="renderEntry from:body">
     <span>
         Hello
     </span>

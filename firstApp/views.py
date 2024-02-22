@@ -60,8 +60,10 @@ def dashboard (request):
 @login_required
 def start_timer(request):
     start_time = timezone.now()
-    request.session['start_time'] = start_time.timestamp() 
+    request.session['start_time'] = start_time.timestamp() #user refresh dile ki memory leak hobe??
     return HttpResponse("<button type='submit' id='endTimerButton' hx-get='/endTimerClicked/' hx-target='#endTimerButton' hx-swap='outerHTML'> Stop Tracking </button>")
+
+
 
 @login_required
 def stop_timer(request):
@@ -72,8 +74,53 @@ def stop_timer(request):
     #TrackedTimeDB te UTC+0 onujayi save ache time. User er timezoneinfo onujayi +- kore user ke show korte hobe
     TrackedTimeDB.objects.create(user=request.user, startTime=datetime.fromtimestamp(start_time), endTime=datetime.fromtimestamp(end_time), duration=timezone.timedelta(seconds=duration))
     del request.session['start_time']
+    
+    
+    htmlcontent = "<button  type='submit' id='startTimerButton' hx-get='/startTimerClicked/' hx-target='#startTimerButton' hx-swap='outerHTML'> Start Tracking </button>"
+    response = HttpResponse(htmlcontent)
+    response['HX-Trigger'] = 'renderEntry'
+    #https://chat.openai.com/share/9e618c15-c614-42e3-b55a-be53b11fb384
 
-    return HttpResponse("<button type='submit' id='startTimerButton' hx-get='/startTimerClicked/' hx-target='#startTimerButton' hx-swap='outerHTML'> Start Tracking </button>")
 
-#ei porjonto. model e save hocche stop korle.
-#ekhon stop korle dashboard e agergula + save howa entry gulo show korar bebostha korte hobe. 
+    return response
+
+
+@login_required
+def renderEntry (request):
+    
+    user = myUserDB.objects.get(username = request.user)
+    last_10_entries = TrackedTimeDB.objects.filter(user=user).order_by('-startTime')[:10]
+    
+    # for entry in last_10_entries:
+    #     localized_start_time = timezone.localtime(entry.startTime, timezone=user.timezone).strftime('%Y-%m-%d %H:%M')
+    #     localized_end_time = timezone.localtime(entry.endTime, timezone=user.timezone).strftime('%Y-%m-%d %H:%M')
+    #     duration_hours, duration_minutes = divmod(entry.duration.total_seconds() // 60, 60)   
+             
+    #     print("Start Time:", localized_start_time)
+    #     print("End Time:", localized_end_time)
+    #     print("Duration: {} hours {} minutes".format(int(duration_hours), int(duration_minutes)))
+    #     print()
+    #querying refference:  https://chat.openai.com/share/4eb58c3c-4539-404f-982b-75bb5b4d2900  
+    
+    entries_data_modified_from_backend = []
+    for entry in last_10_entries:
+        localized_start_time = timezone.localtime(entry.startTime, timezone=user.timezone).strftime('%Y-%m-%d %H:%M')
+        localized_end_time = timezone.localtime(entry.endTime, timezone=user.timezone).strftime('%Y-%m-%d %H:%M')
+        duration_hours, duration_minutes = divmod(entry.duration.total_seconds() // 60, 60)
+        
+        # Append entry data to the list
+        entries_data_modified_from_backend.append({
+            'start_time': localized_start_time,
+            'end_time': localized_end_time,
+            'duration_hours': int(duration_hours),
+            'duration_minutes': int(duration_minutes)
+        })
+
+    context = {
+        'readyEntries': entries_data_modified_from_backend
+    }  
+    
+    
+    return render(request, 'firstApp/entries.html', context)
+
+    

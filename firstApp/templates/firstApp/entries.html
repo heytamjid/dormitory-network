@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+
+{% block body %}
+
+<div id="onlyEntries">
+    <b>Your Last 10 Tracked Time: </b>
+
+    <ul>
+        {% for entry in readyEntries %}
+            <li>
+                <p>Start Time: {{ entry.start_time }}</p>
+                <p>End Time: {{ entry.end_time }}</p>
+                <p>Duration: {{ entry.duration_hours }} hours {{ entry.duration_minutes }} minutes</p>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+
+
+
+{% endblock %}

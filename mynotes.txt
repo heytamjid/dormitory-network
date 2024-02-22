@@ -1,0 +1,4 @@
+HX-Trigger Response Headers
+https://htmx.org/headers/hx-trigger/
+
+https://htmx.org/examples/update-other-content/
