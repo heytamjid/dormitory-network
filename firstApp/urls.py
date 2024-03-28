@@ -12,6 +12,8 @@ urlpatterns = [
     path('startTimerClicked/', views.start_timer, name = "startTimerClicked"),
     path('endTimerClicked/', views.stop_timer, name = "endTimerClicked"),
     path('endTimerClicked/renderEntry/', views.renderEntry, name = "renderEntry"),
+    path('add/course/', views.addCourse, name = "addCourse"),
+    path('add/topic/', views.addTopic, name = "addTopic"),
 
     
 ]

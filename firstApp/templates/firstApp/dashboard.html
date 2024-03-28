@@ -8,6 +8,17 @@
 
 
 {% comment %} Start of new button {% endcomment %}
+{% comment %} <select class="custom-select mb-4" name="courseSelect">
+
+    <option selected>Unselected</option>
+    {% for course in courses %}
+        <option value="{{course.pk}}">{{ course.name }}</option>
+    {% endfor %}
+</select> {% endcomment %}
+
+{% comment %} <div id="modules">
+    {% include 'partials/modules.html' %} 
+</div> {% endcomment %}
 
 {% comment %} End of new button {% endcomment %}
 <br><br>
@@ -15,7 +26,7 @@
 <button type="submit" id="startTimerButton" hx-get="/startTimerClicked/" hx-target="#startTimerButton" hx-swap="outerHTML"> Start Tracking </button>
 
 
-<div id = "trackedTime" hx-select="#onlyEntries2" hx-get="/endTimerClicked/renderEntry/" hx-trigger="renderEntryzz from:body"> 
+<div id = "trackedTime" hx-select="#onlyEntries2" hx-get="/endTimerClicked/renderEntry/" hx-trigger="renderEntryzz from:body, load"> 
     {% comment %} from:html also works  {% endcomment %}
     {% comment %} hx-trigger="renderEntryzz from:body" means that this action should be triggered WHEN an event (called renderEntryzz) is detected within the body of the HTML document. {% endcomment %}
     {% comment %} https://htmx.org/docs/#:~:text=from%3A%3CCSS%20Selector%3E%20%2D%20listen%20for%20the%20event%20on%20a%20different%20element.%20This%20can%20be%20used%20for%20things%20like%20keyboard%20shortcuts. {% endcomment %}

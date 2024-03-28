@@ -55,7 +55,33 @@ def dashboard (request):
         'username' : request.user.username, 
     }
     return render (request, 'firstApp/dashboard.html', context)
-    
+
+@login_required
+def addCourse (request):
+    if request.method == 'POST':
+        form = CourseForm(request.POST) #initializes a CourseForm instance with the data contained in the POST request. It binds the form data to the form so that it can be validated.
+        if form.is_valid(): # checks if the form data is valid based on the constraints defined in the CourseForm class
+            course = form.save(commit=False) #If the form data is valid, this line creates a Course object using the form data, but it doesn't save it to the database yet (commit=False). This allows you to make any additional changes to the object before saving it.
+            course.user = request.user  # Assign the logged-in user to the course
+            course.save() #save it to db finally
+            return redirect('firstApp/dashboard.html')  
+    else:
+        form = CourseForm()
+    return render(request, 'firstApp/newCourse.html', {'form': form})
+
+
+@login_required
+def addTopic (request):
+    if request.method == 'POST':
+        form = TopicForm(request.POST)
+        if form.is_valid():
+            topic = form.save(commit=False)
+            topic.user = request.user 
+            topic.save()
+            return redirect('firstApp/dashboard.html') 
+    else:
+        form = TopicForm()
+    return render(request, 'firstApp/newTopic.html', {'form': form})
     
     
 

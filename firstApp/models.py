@@ -18,13 +18,15 @@ class myUserDB (AbstractUser):
 class Course(models.Model):
     name = models.CharField(max_length=100)
     isArchived = models.BooleanField(default = False)
+    user = models.ForeignKey(myUserDB, on_delete=models.CASCADE, related_name = 'Course2myUserDBRelatedName')
 
     def __str__(self):
         return self.name
 
 class Topic(models.Model):
     name = models.CharField(max_length=100)
-    course = models.ForeignKey(Course, on_delete=models.SET_NULL, null =  True, related_name = 'TopicRelatedName')
+    course = models.ForeignKey(Course, on_delete=models.SET_NULL, null =  True, related_name = 'Topic2CourseRelatedName')
+    user = models.ForeignKey(myUserDB, on_delete=models.CASCADE, related_name = 'Topic2myUserDBRelatedName')
 
     def __str__(self):
         return self.name

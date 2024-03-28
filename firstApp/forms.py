@@ -11,3 +11,14 @@ class LoginForm(AuthenticationForm):
     class Meta:
         model = myUserDB
         fields = ['username', 'password']
+
+
+class CourseForm(forms.ModelForm):
+    class Meta:
+        model = Course
+        fields = ['name']
+
+class TopicForm(forms.ModelForm):
+    class Meta:
+        model = Topic
+        fields = ['name', 'course'] 
