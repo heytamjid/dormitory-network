@@ -1,0 +1,6 @@
+<select class="custom-select mb-4" name="topicSelect">
+    <option selected>Unselected</option>
+    {% for topic in topics %}
+        <option value="{{topic.pk}}">{{ topic.name }}</option>
+    {% endfor %}
+</select> 

@@ -14,6 +14,9 @@ urlpatterns = [
     path('endTimerClicked/renderEntry/', views.renderEntry, name = "renderEntry"),
     path('add/course/', views.addCourse, name = "addCourse"),
     path('add/topic/', views.addTopic, name = "addTopic"),
-
+    path('get/topics/', views.getTopics, name = "getTopics"),
     
 ]
+ 
+ 
+    #path('get_topics/<int:course_id>/', views.get_topics, name = "get_topics"),    

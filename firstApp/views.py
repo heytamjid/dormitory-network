@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from .forms import SignUpForm, LoginForm
@@ -23,7 +23,7 @@ def signup(request):
             password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=password)
             login(request, user)
-            return redirect('dashboard')  # Replace 'home' with the URL you want to redirect to after signup
+            return redirect('dashboard')  
     else:
         form = SignUpForm()
     return render(request, 'firstApp/signup.html', {'form': form})
@@ -51,10 +51,19 @@ def logoutFunc(request):
 @login_required
 def dashboard (request):
     context =  {
-        'courses': Course.objects.all(),
+        'courses': Course.objects.filter(user = request.user).all(),
+        'topics': Topic.objects.filter(user = request.user, course = None ).all(), #Note, not ==. also user & course are fields of Topic model
         'username' : request.user.username, 
     }
     return render (request, 'firstApp/dashboard.html', context)
+
+@login_required
+def getTopics (request):
+    course = request.GET.get('courseSelect') #see how htmx also sends form/select data from frontend to backend #get the selected course id (most probably primary key number) from the request #courseSelect is the name of the select tag in the dashboard.html
+    print("Selected Course:", course)
+    topics = Topic.objects.filter(course=course) #note not ==. course is a field of Topic model.
+    context = {'topics': topics}
+    return render(request, 'partials/topics.html', context)
 
 @login_required
 def addCourse (request):
@@ -64,7 +73,7 @@ def addCourse (request):
             course = form.save(commit=False) #If the form data is valid, this line creates a Course object using the form data, but it doesn't save it to the database yet (commit=False). This allows you to make any additional changes to the object before saving it.
             course.user = request.user  # Assign the logged-in user to the course
             course.save() #save it to db finally
-            return redirect('firstApp/dashboard.html')  
+            return redirect('dashboard')  
     else:
         form = CourseForm()
     return render(request, 'firstApp/newCourse.html', {'form': form})
@@ -78,10 +87,10 @@ def addTopic (request):
             topic = form.save(commit=False)
             topic.user = request.user 
             topic.save()
-            return redirect('firstApp/dashboard.html') 
+            return redirect('dashboard') #named url?
     else:
         form = TopicForm()
-    return render(request, 'firstApp/newTopic.html', {'form': form})
+    return render(request, 'firstApp/newTopic.html', {'form': form}) #relative url? as settings.py has TEMPLATES = [ {'DIRS': [],'APP_DIRS': True ] so it will look for the template in the root/appFolder (as APP_DIRS is enabled)/templates (auto?)/appName (given)/ html file (given). 
     
     
 
@@ -90,7 +99,7 @@ def addTopic (request):
 def start_timer(request):
     start_time = timezone.now()
     request.session['start_time'] = start_time.timestamp() #user refresh dile ki memory leak hobe??
-    return HttpResponse("<button type='submit' id='endTimerButton' hx-get='/endTimerClicked/' hx-target='#endTimerButton' hx-swap='outerHTML'> Stop Tracking </button>")
+    return HttpResponse("<button type='submit' id='endTimerButton' hx-get='/endTimerClicked/' hx-target='#endTimerButton' hx-swap='outerHTML'> Stop Tracking </button>") #kebol bairer ta double quoted dite hobe. vitorer gula sob single quotation
 
 
 
@@ -99,6 +108,10 @@ def stop_timer(request):
     end_time = timezone.now().timestamp()
     start_time = request.session['start_time']
     duration = (end_time - start_time)
+    
+    
+    selectedCourse = request.GET.get('courseSelect') 
+    print("Selected Course:", selectedCourse)
 
     #TrackedTimeDB te UTC+0 onujayi save ache time. User er timezoneinfo onujayi +- kore user ke show korte hobe
     TrackedTimeDB.objects.create(user=request.user, startTime=datetime.fromtimestamp(start_time), endTime=datetime.fromtimestamp(end_time), duration=timezone.timedelta(seconds=duration))
@@ -108,7 +121,7 @@ def stop_timer(request):
     htmlcontent = "<button  type='submit' id='startTimerButton' hx-get='/startTimerClicked/' hx-target='#startTimerButton' hx-swap='outerHTML'> Start Tracking </button>"
     response = HttpResponse(htmlcontent)
     response['HX-Trigger'] = 'renderEntryzz' # upon receiving the response, it (the response) will trigger that [<div id = "trackedTime" hx-select="#onlyEntries2" hx-get="/endTimerClicked/renderEntry/" hx-trigger="renderEntryzz from:body">] in dashboard.html, which (that div) will then make a get request to /endTimerClicked/renderEntry/ and replace the content of itself with the response of that get request to the /endTimerClicked/renderEntry/ endpoint
-    #https://chat.openai.com/share/9e618c15-c614-42e3-b55a-be53b11fb384
+    #https://chat.openai.com/share/873634e8-2731-47a5-af00-c9fb598beb2e
 
 
     return response
