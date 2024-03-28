@@ -6,14 +6,21 @@
 <h3> Hello {{username}} </h3>
 <a href="{% url 'logout' %}">Logout</a>
 
+
+{% comment %} Start of new button {% endcomment %}
+
+{% comment %} End of new button {% endcomment %}
 <br><br>
 
 <button type="submit" id="startTimerButton" hx-get="/startTimerClicked/" hx-target="#startTimerButton" hx-swap="outerHTML"> Start Tracking </button>
 
 
-<h2> Your Tracked Time </h2>
-
-<div id = "trackedTime" hx-select="#onlyEntries" hx-get="/endTimerClicked/renderEntry/" hx-trigger="renderEntry from:body">
+<div id = "trackedTime" hx-select="#onlyEntries2" hx-get="/endTimerClicked/renderEntry/" hx-trigger="renderEntryzz from:body"> 
+    {% comment %} from:html also works  {% endcomment %}
+    {% comment %} hx-trigger="renderEntryzz from:body" means that this action should be triggered WHEN an event (called renderEntryzz) is detected within the body of the HTML document. {% endcomment %}
+    {% comment %} https://htmx.org/docs/#:~:text=from%3A%3CCSS%20Selector%3E%20%2D%20listen%20for%20the%20event%20on%20a%20different%20element.%20This%20can%20be%20used%20for%20things%20like%20keyboard%20shortcuts. {% endcomment %}
+    {% comment %} so basically hx-trigger specifies when something (the item itself OR FROM A DIFFERENT PART OTHER THAN WHERE IT IS WRITTEN. FOR THE 2ND CASE, YOU NEED FROM:CSS SELECTOR ) is changed/ triggered/ happened/ listened (as defined in hx-trigger),
+    htmx will issue a request as defined and the response will be processed at wherever hx-select points to   {% endcomment %}
     <span>
         Hello
     </span>

@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from .models import *
 from datetime import datetime
+from .forms import *
 
 
 
@@ -49,10 +50,12 @@ def logoutFunc(request):
 
 @login_required
 def dashboard (request):
-    username = request.user.username
-    return render (request, 'firstApp/dashboard.html', {
-        'username' : username,
-    })
+    context =  {
+        'courses': Course.objects.all(),
+        'username' : request.user.username, 
+    }
+    return render (request, 'firstApp/dashboard.html', context)
+    
     
     
 
@@ -78,7 +81,7 @@ def stop_timer(request):
     
     htmlcontent = "<button  type='submit' id='startTimerButton' hx-get='/startTimerClicked/' hx-target='#startTimerButton' hx-swap='outerHTML'> Start Tracking </button>"
     response = HttpResponse(htmlcontent)
-    response['HX-Trigger'] = 'renderEntry'
+    response['HX-Trigger'] = 'renderEntryzz' # upon receiving the response, it (the response) will trigger that [<div id = "trackedTime" hx-select="#onlyEntries2" hx-get="/endTimerClicked/renderEntry/" hx-trigger="renderEntryzz from:body">] in dashboard.html, which (that div) will then make a get request to /endTimerClicked/renderEntry/ and replace the content of itself with the response of that get request to the /endTimerClicked/renderEntry/ endpoint
     #https://chat.openai.com/share/9e618c15-c614-42e3-b55a-be53b11fb384
 
 
@@ -104,16 +107,20 @@ def renderEntry (request):
     
     entries_data_modified_from_backend = []
     for entry in last_10_entries:
-        localized_start_time = timezone.localtime(entry.startTime, timezone=user.timezone).strftime('%Y-%m-%d %H:%M')
-        localized_end_time = timezone.localtime(entry.endTime, timezone=user.timezone).strftime('%Y-%m-%d %H:%M')
-        duration_hours, duration_minutes = divmod(entry.duration.total_seconds() // 60, 60)
+        localized_start_time = timezone.localtime(entry.startTime, timezone=user.timezone).strftime('%Y-%m-%d %H:%M:%S')
+        localized_end_time = timezone.localtime(entry.endTime, timezone=user.timezone).strftime('%Y-%m-%d %H:%M:%S')
+
+        total_seconds = entry.duration.total_seconds()
+        duration_hours, remaining_seconds = divmod(total_seconds, 3600)
+        duration_minutes, duration_seconds = divmod(remaining_seconds, 60)        
         
         # Append entry data to the list
         entries_data_modified_from_backend.append({
             'start_time': localized_start_time,
             'end_time': localized_end_time,
             'duration_hours': int(duration_hours),
-            'duration_minutes': int(duration_minutes)
+            'duration_minutes': int(duration_minutes),
+            'duration_seconds' : int(duration_seconds)
         })
 
     context = {
@@ -122,5 +129,3 @@ def renderEntry (request):
     
     
     return render(request, 'firstApp/entries.html', context)
-
-    

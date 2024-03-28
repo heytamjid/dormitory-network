@@ -1,3 +1,2 @@
 in views.py
 
-and then send back somehow the trackedtimes info and display them on dashboard

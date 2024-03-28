@@ -1,1 +1,2 @@
 pip install django-timezone-field
+python -m pip install django-debug-toolbar
