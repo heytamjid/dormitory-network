@@ -3,7 +3,7 @@
 
 {% block body %}
 
-<h3 id = "storedata"> Hello {{username}} </h3>
+<h3> Hello {{username}} </h3>
 <a href="{% url 'logout' %}">Logout</a>
 
 
@@ -13,7 +13,7 @@
     hx-trigger="change"
     hx-target="#topic-dropdown-div">
 
-    <option selected>Unselected</option>
+    <option value="" selected>Unselected</option>
     {% for course in courses %}
         <option value="{{course.pk}}">{{ course.name }}</option>
     {% endfor %}
@@ -26,10 +26,12 @@
     also the context sent in this page is also avaiable in the included partial page. {% endcomment %}
 </div> 
 
+
+<input id="sessionDescription" placeholder="Session Description" type="text">
+
 <br><br>
 
-<button hx-vals="js:{selectedCourse : document.getElementById('storedata').dataset.selectedCourse}" hx-trigger="click" type="submit" id="startTimerButton" hx-get="/startTimerClicked/" hx-target="#startTimerButton" hx-swap="outerHTML">Start Tracking</button>
-{% comment %} hx-vals="{'selectedCourse': document.getElementById('courseSelect').value}"> but this JavaScript expression will be evaluated immediately when the page is loaded, not when the button is clicked.  {% endcomment %}
+<button hx-trigger="click" type="submit" id="startTimerButton" hx-get="/startTimerClicked/" hx-target="#startTimerButton" hx-swap="outerHTML">Start Tracking</button>
 
 
 
@@ -45,16 +47,15 @@
     </span>
 </div>
 
-<script> 
-    {% comment %} learn JS. evenListener, getElementbyId, console.log. How about saving something in a varibale? {% endcomment %}
-    {% comment %} script is located at the end, in fact AFTER the element that is related. Also script might not find the content if it is dynamically changed/altered. Also script stops working at its first encounted error line unless handled with try-catch block {% endcomment %}
+{% comment %} <script> 
+    {% comment %} learn JS. evenListener, getElementbyId, dataset, console.log. How about saving something in a varibale?
+    {% comment %} script is located at the end, in fact AFTER the element that is related. Also script might not find the content if it is dynamically changed/altered. Also script stops working at its first encounted error line unless handled with try-catch block
     document.getElementById("courseSelect").addEventListener("change", function() {
         const selectedCourse = document.getElementById('courseSelect').value; 
         document.getElementById("storedata").dataset.selectedCourse = selectedCourse;
         console.log("Selected Course: ", document.getElementById("storedata").dataset.selectedCourse);
       });
 </script>
-
-<script>console.log("HEY")</script>
+<script>console.log("HEY")</script> {% endcomment %}
 
 {% endblock %}

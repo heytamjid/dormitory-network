@@ -99,14 +99,11 @@ def addTopic (request):
 def start_timer(request):
     start_time = timezone.now()
     request.session['start_time'] = start_time.timestamp() #user refresh dile ki memory leak hobe??
-    print("LETS PRINT ITTTTTTTTTTTTTT")
-    print(request.session['start_time'])
-    selectedCourse = request.GET.get('selectedCourse') 
-    print("Selected Courseeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee:", selectedCourse)
-    return HttpResponse("<button type='submit' id='endTimerButton'  hx-vals='js:{selectedCourse : document.getElementById(&#39;storedata&#39;).dataset.selectedCourse}' hx-trigger='click' hx-get='/endTimerClicked/' hx-target='#endTimerButton' hx-swap='outerHTML'>  Stop Tracking </button>")
+    return HttpResponse("<button type='submit' id='endTimerButton'  hx-vals='js:{selectedCourse : document.getElementById(&#39;courseSelect&#39;).value, selectedTopic : document.getElementById(&#39;topicSelect&#39;).value, selectedDescription : document.getElementById(&#39;sessionDescription&#39;).value}' hx-trigger='click' hx-get='/endTimerClicked/' hx-target='#endTimerButton' hx-swap='outerHTML'>  Stop Tracking </button>")
     #note the &#39; is used to escape the single quote in the string. It is used because the string is enclosed in single quotes. If the string was enclosed in double quotes, then we would have used &quot; to escape the double quote.
     #also single quote is typically  used inside doulbe quote
     #also json format must be in double quote. so we can't use double quote inside double quote. so we use single quote inside double quote.
+    # JSON could be string, number, object, array, true, false, null. But it can't be a function or evaluatable variable. To evaluate them use js as mentioned here https://htmx.org/attributes/hx-vals/ or use https://htmx.org/attributes/hx-vars/ that is dynamically computed.
 
 @login_required
 def stop_timer(request):
@@ -116,10 +113,32 @@ def stop_timer(request):
     
     
     selectedCourse = request.GET.get('selectedCourse') 
-    print("Selected Courseeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee:", selectedCourse)
-
+    print("Selected Course:", selectedCourse)
+    selectedTopic = request.GET.get('selectedTopic') #so we just got the value - which is defined as primary key or '' in the html file. #selectedTopic is the name of the select tag in the dashboard.html
+    
+    
+    print("Selected Topic:", selectedTopic)
+    #so primary key for each table or model is started from 1 to infinity at its own table. So, if we want to save the selected course and topic in the TrackedTimeDB model, we need to get the primary key of the selected course and topic.
+    #problem: deal with unselected course that should show up as None in the database. Also deal with unselected topic that should show up as None in the database..
+    #problem: when course is back to unselected in frontend, topics NOT associated with any course should show up in the topic dropdown.
+    selectedDescription = request.GET.get('selectedDescription')
+    print("Selected Description:", selectedDescription)   
+    
+    
     #TrackedTimeDB te UTC+0 onujayi save ache time. User er timezoneinfo onujayi +- kore user ke show korte hobe
-    TrackedTimeDB.objects.create(user=request.user, startTime=datetime.fromtimestamp(start_time), endTime=datetime.fromtimestamp(end_time), duration=timezone.timedelta(seconds=duration))
+    newTrackedTimeInstance = TrackedTimeDB(
+        user=request.user, 
+        startTime=datetime.fromtimestamp(start_time), 
+        endTime=datetime.fromtimestamp(end_time), 
+        duration=timezone.timedelta(seconds=duration), 
+        topic = Topic.objects.get(pk = selectedTopic) if (selectedTopic!='') else None,  #ternary operator. #RHS e both are topic instances.
+        #modelName.objects.get(pk) gets you an instance whereas modelName.objects.filter(pk) gets you a queryset 
+        session = selectedDescription
+    )
+    newTrackedTimeInstance.save()
+
+    #Oldline of code with modelName.objects.create() #TrackedTimeDB.objects.create(user=request.user, startTime=datetime.fromtimestamp(start_time), endTime=datetime.fromtimestamp(end_time), duration=timezone.timedelta(seconds=duration), topic = Topic.objects.get(pk = selectedTopic) if (selectedTopic!='NONE') else None, session = selectedDescription) 
+    
     del request.session['start_time']
     
     
@@ -149,25 +168,30 @@ def renderEntry (request):
     #     print()
     #querying refference:  https://chat.openai.com/share/4eb58c3c-4539-404f-982b-75bb5b4d2900  
     
-    entries_data_modified_from_backend = []
+    entries_data_modified_from_backend = [] #list. ordered list. indexing. mutable. different types of data. []
     for entry in last_10_entries:
         localized_start_time = timezone.localtime(entry.startTime, timezone=user.timezone).strftime('%Y-%m-%d %H:%M:%S')
         localized_end_time = timezone.localtime(entry.endTime, timezone=user.timezone).strftime('%Y-%m-%d %H:%M:%S')
 
         total_seconds = entry.duration.total_seconds()
         duration_hours, remaining_seconds = divmod(total_seconds, 3600)
-        duration_minutes, duration_seconds = divmod(remaining_seconds, 60)        
-        
+        duration_minutes, duration_seconds = divmod(remaining_seconds, 60)  
+                
         # Append entry data to the list
-        entries_data_modified_from_backend.append({
+        entries_data_modified_from_backend.append ({ #so it is a list of dictionary!
             'start_time': localized_start_time,
             'end_time': localized_end_time,
             'duration_hours': int(duration_hours),
             'duration_minutes': int(duration_minutes),
-            'duration_seconds' : int(duration_seconds)
+            'duration_seconds' : int(duration_seconds),
+            'course' : 'Unselected Course' if (entry.topic is None) else      'Unselected Course' if (entry.topic.course is None) else entry.topic.course.name, #condition validating.
+            'topic': 'Unselected Topic' if entry.topic is None else entry.topic.name, #condition validating
+            'session': entry.session,
         })
 
-    context = {
+    context = { #dictionary. unordered. key-value pairs. immutable. same type of data. {} 
+               #so we passed a list (of dictionaries) that is turned into value of a dictionary key (namely 'renderEntries')
+               #so in the front end, we have to loop through the list (the dictionary value) to get the data of each entry. Note that each value itself will be a dictionary. 
         'readyEntries': entries_data_modified_from_backend
     }  
     
