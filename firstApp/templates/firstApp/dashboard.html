@@ -3,8 +3,9 @@
 
 {% block body %}
 
-<h3> Hello {{username}} </h3>
+<h3 id = "storedata"> Hello {{username}} </h3>
 <a href="{% url 'logout' %}">Logout</a>
+
 
 
 <select id ='courseSelect' class="custom-select mb-4" name="courseSelect"
@@ -27,11 +28,12 @@
 
 <br><br>
 
-<button type="submit" id="startTimerButton" hx-get="/startTimerClicked/" hx-target="#startTimerButton" hx-swap="outerHTML"> 
-Start Tracking </button>
+<button hx-vals="js:{selectedCourse : document.getElementById('storedata').dataset.selectedCourse}" hx-trigger="click" type="submit" id="startTimerButton" hx-get="/startTimerClicked/" hx-target="#startTimerButton" hx-swap="outerHTML">Start Tracking</button>
+{% comment %} hx-vals="{'selectedCourse': document.getElementById('courseSelect').value}"> but this JavaScript expression will be evaluated immediately when the page is loaded, not when the button is clicked.  {% endcomment %}
 
 
-<div id = "trackedTime" hx-select="#onlyEntries2" hx-get="/endTimerClicked/renderEntry/" hx-trigger="renderEntryzz from:body, load"> 
+
+<div id = "trackedTime" hx-select="#onlyEntries2" hx-get="/endTimerClicked/renderEntry/" hx-trigger="renderEntryzz from:body, load" hx> 
     {% comment %} from:html also works  {% endcomment %}
     {% comment %} hx-trigger="renderEntryzz from:body" means that this action should be triggered WHEN an event (called renderEntryzz) is detected within the body of the HTML document. {% endcomment %}
     {% comment %} https://htmx.org/docs/#:~:text=from%3A%3CCSS%20Selector%3E%20%2D%20listen%20for%20the%20event%20on%20a%20different%20element.%20This%20can%20be%20used%20for%20things%20like%20keyboard%20shortcuts. {% endcomment %}
@@ -42,5 +44,17 @@ Start Tracking </button>
         Hello
     </span>
 </div>
+
+<script> 
+    {% comment %} learn JS. evenListener, getElementbyId, console.log. How about saving something in a varibale? {% endcomment %}
+    {% comment %} script is located at the end, in fact AFTER the element that is related. Also script might not find the content if it is dynamically changed/altered. Also script stops working at its first encounted error line unless handled with try-catch block {% endcomment %}
+    document.getElementById("courseSelect").addEventListener("change", function() {
+        const selectedCourse = document.getElementById('courseSelect').value; 
+        document.getElementById("storedata").dataset.selectedCourse = selectedCourse;
+        console.log("Selected Course: ", document.getElementById("storedata").dataset.selectedCourse);
+      });
+</script>
+
+<script>console.log("HEY")</script>
 
 {% endblock %}

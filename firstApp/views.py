@@ -99,9 +99,14 @@ def addTopic (request):
 def start_timer(request):
     start_time = timezone.now()
     request.session['start_time'] = start_time.timestamp() #user refresh dile ki memory leak hobe??
-    return HttpResponse("<button type='submit' id='endTimerButton' hx-get='/endTimerClicked/' hx-target='#endTimerButton' hx-swap='outerHTML'> Stop Tracking </button>") #kebol bairer ta double quoted dite hobe. vitorer gula sob single quotation
-
-
+    print("LETS PRINT ITTTTTTTTTTTTTT")
+    print(request.session['start_time'])
+    selectedCourse = request.GET.get('selectedCourse') 
+    print("Selected Courseeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee:", selectedCourse)
+    return HttpResponse("<button type='submit' id='endTimerButton'  hx-vals='js:{selectedCourse : document.getElementById(&#39;storedata&#39;).dataset.selectedCourse}' hx-trigger='click' hx-get='/endTimerClicked/' hx-target='#endTimerButton' hx-swap='outerHTML'>  Stop Tracking </button>")
+    #note the &#39; is used to escape the single quote in the string. It is used because the string is enclosed in single quotes. If the string was enclosed in double quotes, then we would have used &quot; to escape the double quote.
+    #also single quote is typically  used inside doulbe quote
+    #also json format must be in double quote. so we can't use double quote inside double quote. so we use single quote inside double quote.
 
 @login_required
 def stop_timer(request):
@@ -110,8 +115,8 @@ def stop_timer(request):
     duration = (end_time - start_time)
     
     
-    selectedCourse = request.GET.get('courseSelect') 
-    print("Selected Course:", selectedCourse)
+    selectedCourse = request.GET.get('selectedCourse') 
+    print("Selected Courseeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee:", selectedCourse)
 
     #TrackedTimeDB te UTC+0 onujayi save ache time. User er timezoneinfo onujayi +- kore user ke show korte hobe
     TrackedTimeDB.objects.create(user=request.user, startTime=datetime.fromtimestamp(start_time), endTime=datetime.fromtimestamp(end_time), duration=timezone.timedelta(seconds=duration))
