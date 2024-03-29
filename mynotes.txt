@@ -1,15 +1,4 @@
 roadmap: on notion
 
-HX-Trigger Response Headers
-https://htmx.org/headers/hx-trigger/
-
-https://htmx.org/examples/update-other-content/
 
 
-how to reset db:
-First, delete the migration files (not the __init__ ones) in your app's migrations directory. Also the pycache folder (not the __init__ ones).
-Then, run python manage.py flush to delete all data from your database.
-Delete the sqllitedb file from explorer. 
-Finally, run python manage.py makemigrations and migrate to apply migrations from scratch.
-
-FAQ: https://stackoverflow.com/questions/36153748/django-makemigrations-no-changes-detected
