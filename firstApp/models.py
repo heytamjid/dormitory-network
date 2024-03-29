@@ -18,15 +18,15 @@ class myUserDB (AbstractUser):
 class Course(models.Model):
     name = models.CharField(max_length=100)
     isArchived = models.BooleanField(default = False)
-    user = models.ForeignKey(myUserDB, on_delete=models.CASCADE, related_name = 'Course2myUserDBRelatedName')
-
+    user = models.ForeignKey(myUserDB, on_delete=models.CASCADE, related_name = 'CourseUnderUser')
+    
     def __str__(self):
         return self.name
 
 class Topic(models.Model):
-    name = models.CharField(max_length=100)
-    course = models.ForeignKey(Course, on_delete=models.SET_NULL, null =  True, related_name = 'Topic2CourseRelatedName')
-    user = models.ForeignKey(myUserDB, on_delete=models.CASCADE, related_name = 'Topic2myUserDBRelatedName')
+    name = models.CharField(max_length=120)
+    course = models.ForeignKey(Course, on_delete=models.SET_NULL, null =  True, related_name = 'TopicUnderCourse')
+    user = models.ForeignKey(myUserDB, on_delete=models.CASCADE, related_name = 'TopicUnderUser')
 
     def __str__(self):
         return self.name
@@ -35,11 +35,12 @@ class Topic(models.Model):
     
 class TrackedTimeDB (models.Model):
 
-    user = models.ForeignKey(myUserDB, on_delete=models.CASCADE, related_name='usersTime')
+    user = models.ForeignKey(myUserDB, on_delete=models.CASCADE, related_name='trackedTimeUnderUser')
     startTime = models.DateTimeField()
     endTime = models.DateTimeField()
     duration = models.DurationField()
-    topic = models.ForeignKey(Topic, on_delete=models.SET_NULL, null = True, default = None, related_name = 'TrackedTimeRelatedName' )
+    course = models.ForeignKey(Course, on_delete=models.SET_NULL, null = True, default = None, related_name = 'trackedTimeUnderCourse' )
+    topic = models.ForeignKey(Topic, on_delete=models.SET_NULL, null = True, default = None, related_name = 'trackedTimeUnderTopic')
     session = models.CharField(max_length=900, null = True, default = None)
     
     def __str__(self):

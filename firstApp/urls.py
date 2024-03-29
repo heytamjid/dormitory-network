@@ -15,6 +15,7 @@ urlpatterns = [
     path('add/course/', views.addCourse, name = "addCourse"),
     path('add/topic/', views.addTopic, name = "addTopic"),
     path('get/topics/', views.getTopics, name = "getTopics"),
+    path('activeusers/', views.active_users, name = "active_users"),
     
 ]
  

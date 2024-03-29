@@ -1,4 +1,5 @@
 from django.http import HttpResponse, JsonResponse
+from django.contrib.sessions.models import Session
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from .forms import SignUpForm, LoginForm
@@ -59,9 +60,13 @@ def dashboard (request):
 
 @login_required
 def getTopics (request):
-    course = request.GET.get('courseSelect') #see how htmx also sends form/select data from frontend to backend #get the selected course id (most probably primary key number) from the request #courseSelect is the name of the select tag in the dashboard.html
-    print("Selected Course:", course)
-    topics = Topic.objects.filter(course=course) #note not ==. course is a field of Topic model.
+    course = request.GET.get('courseSelect') #see how htmx also sends form/select key-values automatically from frontend to backend #course will store the selected course id (primary key number) (not sure as int or str) #courseSelect is the name of the select tag in the dashboard.html
+    print("SSSSelected Course:", course)
+    if (course != ''):
+        topics = Topic.objects.filter(course=course).all() #note not ==. # LHS course is a field of the Topic model, RHS course is the selected course's primary key. #https://pastebin.com/zqQeXv84
+    else:
+        topics = Topic.objects.filter(user = request.user, course = None ).all() #Note querying on multiple conditions #in many cases omitting .all() will still work because Django will 'lazily' evaluate the queryset when necessary
+    #topics is defined in both the if and else branches of the if-else statement. Therefore, it can be accessed outside the if-else block without any issues.
     context = {'topics': topics}
     return render(request, 'partials/topics.html', context)
 
@@ -131,6 +136,7 @@ def stop_timer(request):
         startTime=datetime.fromtimestamp(start_time), 
         endTime=datetime.fromtimestamp(end_time), 
         duration=timezone.timedelta(seconds=duration), 
+        course = Course.objects.get(pk = selectedCourse) if (selectedCourse!='') else None,
         topic = Topic.objects.get(pk = selectedTopic) if (selectedTopic!='') else None,  #ternary operator. #RHS e both are topic instances.
         #modelName.objects.get(pk) gets you an instance whereas modelName.objects.filter(pk) gets you a queryset 
         session = selectedDescription
@@ -184,7 +190,7 @@ def renderEntry (request):
             'duration_hours': int(duration_hours),
             'duration_minutes': int(duration_minutes),
             'duration_seconds' : int(duration_seconds),
-            'course' : 'Unselected Course' if (entry.topic is None) else      'Unselected Course' if (entry.topic.course is None) else entry.topic.course.name, #condition validating.
+            'course' : 'Unselected Course' if entry.course is None else entry.course.name, #Old code when trackedtimedb used to have only topic foreign key, and course was evaluated according to topic #'Unselected Course' if (entry.topic is None) else      'Unselected Course' if (entry.topic.course is None) else entry.topic.course.name, #condition validating.
             'topic': 'Unselected Topic' if entry.topic is None else entry.topic.name, #condition validating
             'session': entry.session,
         })
@@ -197,3 +203,17 @@ def renderEntry (request):
     
     
     return render(request, 'firstApp/entries.html', context)
+
+
+def active_users(request):
+    #to work on later: https://chat.openai.com/share/6dce5375-0b7a-4c29-b301-92e6cb04f535 Title: Active Users
+    active_sessions = Session.objects.filter(expire_date__gte=datetime.now())
+    active_usernames = []
+    for session in active_sessions:
+        session_data = session.get_decoded()
+        if 'start_time' in session_data:
+            user_id = session_data['_auth_user_id']
+            user = myUserDB.objects.get(pk=user_id)
+            active_usernames.append(user.username)
+    return render(request, 'partials/active_users.html', {'active_usernames': active_usernames})
+
