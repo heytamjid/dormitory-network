@@ -20,9 +20,11 @@ urlpatterns = [
     path('activeusers/', views.active_users, name = "active_users"),
     path('topic/<int:pk>/edit/', views.edit_topic, name='edit_topic'),
     path('course/<int:pk>/edit/', views.edit_course, name='edit_course'),
-    path('course/<int:pk>/edit/', views.edit_course, name='edit_course'),
     path('edit/trackedtime/<int:pk>/', views.edit_trackedtime, name='edit_trackedtime'),
     path('profile/edit/<str:username>/', views.edit_user, name='edit_user'),
+    path('entry/course/<int:pk>/', views.renderEntrybyCourse, name='renderEntrybyCourse'),
+    path('entry/topic/<int:pk>/', views.renderEntrybyTopic, name='renderEntrybyTopic'),
+    
     
 ]  + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
  

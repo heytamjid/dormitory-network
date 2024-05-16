@@ -3,11 +3,14 @@
 
 {% block body %}
 
-<h3> Hello {{username}} </h3>
-<a href="{% url 'logout' %}">Logout</a>
+<h3> Hello {{username}}, you are logged in! </h3>
+<a class="font-medium text-blue-600 dark:text-blue-500 hover:underline" href="{% url 'logout' %}">Logout</a>
 
+<br></br>
 
+{% comment %} {% include "partials/timerbox.html" %} {% endcomment %}
 
+Select Course:
 <select id ='courseSelect' class="custom-select mb-4" name="courseSelect"
     hx-get="{% url 'getTopics' %}"
     hx-trigger="change"
@@ -27,11 +30,12 @@
 </div> 
 
 
+ 
 <input id="sessionDescription" placeholder="Session Description" type="text">
 
 <br><br>
 
-<button hx-trigger="click" type="submit" id="startTimerButton" hx-get="/startTimerClicked/" hx-target="#startTimerButton" hx-swap="outerHTML">Start Tracking</button>
+<button hx-trigger="click" type="submit" id="startTimerButton" hx-get="/startTimerClicked/" hx-target="#startTimerButton" hx-swap="outerHTML" class="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Start Tracking</button>
 
 
 

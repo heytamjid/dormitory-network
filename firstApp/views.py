@@ -104,7 +104,7 @@ def addTopic (request):
 def start_timer(request):
     start_time = timezone.now()
     request.session['start_time'] = start_time.timestamp() #user refresh dile ki memory leak hobe??
-    return HttpResponse("<button type='submit' id='endTimerButton'  hx-vals='js:{selectedCourse : document.getElementById(&#39;courseSelect&#39;).value, selectedTopic : document.getElementById(&#39;topicSelect&#39;).value, selectedDescription : document.getElementById(&#39;sessionDescription&#39;).value}' hx-trigger='click' hx-get='/endTimerClicked/' hx-target='#endTimerButton' hx-swap='outerHTML'>  Stop Tracking </button>")
+    return HttpResponse("<button type='submit' id='endTimerButton'  hx-vals='js:{selectedCourse : document.getElementById(&#39;courseSelect&#39;).value, selectedTopic : document.getElementById(&#39;topicSelect&#39;).value, selectedDescription : document.getElementById(&#39;sessionDescription&#39;).value}' hx-trigger='click' hx-get='/endTimerClicked/' hx-target='#endTimerButton' hx-swap='outerHTML' class='text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2'>  Stop Tracking </button>")
     #note the &#39; is used to escape the single quote in the string. It is used because the string is enclosed in single quotes. If the string was enclosed in double quotes, then we would have used &quot; to escape the double quote.
     #also single quote is typically  used inside doulbe quote
     #also json format must be in double quote. so we can't use double quote inside double quote. so we use single quote inside double quote.
@@ -148,7 +148,7 @@ def stop_timer(request):
     del request.session['start_time']
     
     
-    htmlcontent = "<button  type='submit' id='startTimerButton' hx-get='/startTimerClicked/' hx-target='#startTimerButton' hx-swap='outerHTML'> Start Tracking </button>"
+    htmlcontent = "<button  type='submit' id='startTimerButton' hx-get='/startTimerClicked/' hx-target='#startTimerButton' hx-swap='outerHTML' class='text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2'> Start Tracking </button>"
     response = HttpResponse(htmlcontent)
     response['HX-Trigger'] = 'renderEntryzz' # upon receiving the response, it (the response) will trigger that [<div id = "trackedTime" hx-select="#onlyEntries2" hx-get="/endTimerClicked/renderEntry/" hx-trigger="renderEntryzz from:body">] in dashboard.html, which (that div) will then make a get request to /endTimerClicked/renderEntry/ and replace the content of itself with the response of that get request to the /endTimerClicked/renderEntry/ endpoint
     #https://chat.openai.com/share/873634e8-2731-47a5-af00-c9fb598beb2e
@@ -190,7 +190,88 @@ def renderEntry (request):
             'duration_hours': int(duration_hours),
             'duration_minutes': int(duration_minutes),
             'duration_seconds' : int(duration_seconds),
+            'course_id': 0 if entry.course is None else entry.course.id,
+            'topic_id': 0 if entry.topic is None else entry.topic.id,
             'course' : 'Unselected Course' if entry.course is None else entry.course.name, #Old code when trackedtimedb used to have only topic foreign key, and course was evaluated according to topic #'Unselected Course' if (entry.topic is None) else      'Unselected Course' if (entry.topic.course is None) else entry.topic.course.name, #condition validating.
+            'topic': 'Unselected Topic' if entry.topic is None else entry.topic.name, #condition validating
+            'session': entry.session,
+        })
+
+    context = { #dictionary. unordered. key-value pairs. immutable. same type of data. {} 
+               #so we passed a list (of dictionaries) that is turned into value of a dictionary key (namely 'renderEntries')
+               #so in the front end, we have to loop through the list (the dictionary value) to get the data of each entry. Note that each value itself will be a dictionary. 
+        'readyEntries': entries_data_modified_from_backend
+    }  
+    
+    
+    return render(request, 'firstApp/entries.html', context)
+
+
+@login_required
+def renderEntrybyCourse (request, pk):
+    
+    user = myUserDB.objects.get(username = request.user)
+    last_10_entries = TrackedTimeDB.objects.filter(user=user, course=pk).order_by('-startTime')[:10]
+    
+    entries_data_modified_from_backend = [] #list. ordered list. indexing. mutable. different types of data. []
+    for entry in last_10_entries:
+        localized_start_time = timezone.localtime(entry.startTime, timezone=user.timezone).strftime('%Y-%m-%d %H:%M:%S')
+        localized_end_time = timezone.localtime(entry.endTime, timezone=user.timezone).strftime('%Y-%m-%d %H:%M:%S')
+
+        total_seconds = entry.duration.total_seconds()
+        duration_hours, remaining_seconds = divmod(total_seconds, 3600)
+        duration_minutes, duration_seconds = divmod(remaining_seconds, 60)  
+                
+        # Append entry data to the list
+        entries_data_modified_from_backend.append ({ #so it is a list of dictionary!
+            'start_time': localized_start_time,
+            'end_time': localized_end_time,
+            'duration_hours': int(duration_hours),
+            'duration_minutes': int(duration_minutes),
+            'duration_seconds' : int(duration_seconds),
+            'course' : 'Unselected Course' if entry.course is None else entry.course.name, #Old code when trackedtimedb used to have only topic foreign key, and course was evaluated according to topic #'Unselected Course' if (entry.topic is None) else      'Unselected Course' if (entry.topic.course is None) else entry.topic.course.name, #condition validating.
+            'course_id': 0 if entry.course is None else entry.course.id,
+            'topic_id': 0 if entry.topic is None else entry.topic.id,
+            'topic': 'Unselected Topic' if entry.topic is None else entry.topic.name, #condition validating
+            'session': entry.session,
+        })
+
+    context = { #dictionary. unordered. key-value pairs. immutable. same type of data. {} 
+               #so we passed a list (of dictionaries) that is turned into value of a dictionary key (namely 'renderEntries')
+               #so in the front end, we have to loop through the list (the dictionary value) to get the data of each entry. Note that each value itself will be a dictionary. 
+        'readyEntries': entries_data_modified_from_backend
+    }  
+    
+    
+    return render(request, 'firstApp/entries.html', context)
+
+
+
+@login_required
+def renderEntrybyTopic (request, pk):
+    
+    user = myUserDB.objects.get(username = request.user)
+    last_10_entries = TrackedTimeDB.objects.filter(user=user, topic=pk).order_by('-startTime')[:10]
+    
+    entries_data_modified_from_backend = [] #list. ordered list. indexing. mutable. different types of data. []
+    for entry in last_10_entries:
+        localized_start_time = timezone.localtime(entry.startTime, timezone=user.timezone).strftime('%Y-%m-%d %H:%M:%S')
+        localized_end_time = timezone.localtime(entry.endTime, timezone=user.timezone).strftime('%Y-%m-%d %H:%M:%S')
+
+        total_seconds = entry.duration.total_seconds()
+        duration_hours, remaining_seconds = divmod(total_seconds, 3600)
+        duration_minutes, duration_seconds = divmod(remaining_seconds, 60)  
+                
+        # Append entry data to the list
+        entries_data_modified_from_backend.append ({ #so it is a list of dictionary!
+            'start_time': localized_start_time,
+            'end_time': localized_end_time,
+            'duration_hours': int(duration_hours),
+            'duration_minutes': int(duration_minutes),
+            'duration_seconds' : int(duration_seconds),
+            'course' : 'Unselected Course' if entry.course is None else entry.course.name, #Old code when trackedtimedb used to have only topic foreign key, and course was evaluated according to topic #'Unselected Course' if (entry.topic is None) else      'Unselected Course' if (entry.topic.course is None) else entry.topic.course.name, #condition validating.
+            'course_id': 0 if entry.course is None else entry.course.id,
+            'topic_id': 0 if entry.topic is None else entry.topic.id,
             'topic': 'Unselected Topic' if entry.topic is None else entry.topic.name, #condition validating
             'session': entry.session,
         })

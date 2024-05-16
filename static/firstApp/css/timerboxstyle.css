@@ -2,14 +2,12 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  background-color: white;
   
 }
 
 html , body{
   height: 100%;
   width: 100%;
-  background-color: white;
 }
 .box{
 margin: 4vw;
@@ -58,4 +56,3 @@ height: 100%;
 border: 2px solid black;
 background-color: gray;
 }
-

@@ -1,0 +1,63 @@
+{% load static %}
+<html>
+  <head>
+    <link rel="stylesheet" href="{% static 'firstApp/css/timerboxstyle.css' %}">
+  </head>
+  <body>
+    
+<div class="box">
+  <div class="box1">
+    <p>Timer Gague</p>
+  </div>
+
+  <div class="box2">
+    <select id ='courseSelect' class="custom-select mb-4" name="courseSelect"
+    hx-get="{% url 'getTopics' %}"
+    hx-trigger="change"
+    hx-target="#topic-dropdown-div">
+
+    <option value="" selected>Unselected</option>
+    {% for course in courses %}
+        <option value="{{course.pk}}">{{ course.name }}</option>
+    {% endfor %}
+    </select> 
+
+
+    <select name="dropdown2" id="dropdown2">
+      <option value="dropdown2">dropdown2</option>
+      <option value="a">a</option>
+      <option value="b">b</option>
+      <option value="c">c</option>
+    </select>
+
+    {% comment %} <div class = "courseTopic" id="topic-dropdown-div">
+      {% include 'partials/topics.html' %} 
+    </div>  
+    {% endcomment %}
+    
+
+
+    
+    <p>Time Elasped</p>
+
+
+
+  </div>
+
+
+  <div class="box3">
+    <input type="text">
+    <select name="dropdown3" id="dropdown3">
+        <option value="dropdown3">dropdown3</option>
+        <option value="a">sda</option>
+        <option value="b">b</option>
+        <option value="c">c</option>
+    </select>
+    <button>Button</button>
+  </div>
+</div>
+
+
+
+  </body>
+</html>
