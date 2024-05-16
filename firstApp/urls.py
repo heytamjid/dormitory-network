@@ -1,5 +1,7 @@
 from django.urls import path
 from . import views
+from django.conf.urls.static import static
+from django.conf import settings
 
 
 
@@ -16,8 +18,13 @@ urlpatterns = [
     path('add/topic/', views.addTopic, name = "addTopic"),
     path('get/topics/', views.getTopics, name = "getTopics"),
     path('activeusers/', views.active_users, name = "active_users"),
+    path('topic/<int:pk>/edit/', views.edit_topic, name='edit_topic'),
+    path('course/<int:pk>/edit/', views.edit_course, name='edit_course'),
+    path('course/<int:pk>/edit/', views.edit_course, name='edit_course'),
+    path('edit/trackedtime/<int:pk>/', views.edit_trackedtime, name='edit_trackedtime'),
+    path('profile/edit/<str:username>/', views.edit_user, name='edit_user'),
     
-]
+]  + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
  
  
     #path('get_topics/<int:course_id>/', views.get_topics, name = "get_topics"),    

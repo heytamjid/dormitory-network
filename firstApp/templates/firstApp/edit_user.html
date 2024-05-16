@@ -1,0 +1,12 @@
+edit_user{% extends 'base.html' %}
+
+
+{% block body %}
+
+<h2>Edit Your Profile</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+</form>
+{% endblock %}

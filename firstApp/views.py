@@ -1,6 +1,6 @@
 from django.http import HttpResponse, JsonResponse
 from django.contrib.sessions.models import Session
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from .forms import SignUpForm, LoginForm
 from django.contrib.auth.decorators import login_required
@@ -217,3 +217,62 @@ def active_users(request):
             active_usernames.append(user.username)
     return render(request, 'partials/active_users.html', {'active_usernames': active_usernames})
 
+##new days ahead
+
+def edit_topic(request, pk):
+    topic = get_object_or_404(Topic, pk=pk)
+    if request.method == 'POST':
+        form = TopicForm(request.POST, instance=topic) #This initializes a form instance with the POST data (request.POST contains the data submitted through the form via POST request upon clicking on submit button) and binds it to the topic instance. 
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard') 
+    else:
+        form = TopicForm(instance=topic) #The instance=topic argument is used to bind the form to the existing instance of the Topic model and prefill the form with the existing data upon rendering. 
+    return render(request, 'firstApp/editTopic.html', {'form': form})
+
+def edit_course(request, pk):
+    course = get_object_or_404(Course, pk=pk)
+    if request.method == 'POST':
+        form = CourseForm(request.POST, instance=course)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')  
+    else:
+        form = CourseForm(instance=course)
+    return render(request, 'firstApp/editCourse.html', {'form': form})
+
+
+def edit_course(request, pk):
+    course = get_object_or_404(Course, pk=pk)
+    if request.method == 'POST':
+        form = CourseForm(request.POST, instance=course)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')  
+    else:
+        form = CourseForm(instance=course)
+    return render(request, 'firstApp/editCourse.html', {'form': form})
+
+
+def edit_trackedtime(request, pk): #this function works but is faulty because duration is needed to be calculated accordingly.. time should be userfriendly. course/topic relation should be accordingly. 
+    tracked_time = get_object_or_404(TrackedTimeDB, pk=pk)
+    if request.method == 'POST':
+        form = TrackedTimeForm(request.POST, instance=tracked_time)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard') 
+    else:
+        form = TrackedTimeForm(instance=tracked_time)
+    return render(request, 'firstApp/editTrackedTime.html', {'form': form})
+
+
+def edit_user(request, username):
+    user = get_object_or_404(myUserDB, username=username)
+    if request.method == 'POST':
+        form = myUserDBForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard') #redirect to userprofile later 
+    else:
+        form = myUserDBForm(instance=user)
+    return render(request, 'firstApp/edit_user.html', {'form': form})

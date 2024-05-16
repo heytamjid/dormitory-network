@@ -26,3 +26,14 @@ class TopicForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(TopicForm, self).__init__(*args, **kwargs)
         self.fields['course'].required = False
+        
+        
+class TrackedTimeForm(forms.ModelForm):
+    class Meta:
+        model = TrackedTimeDB
+        fields = ['startTime', 'endTime', 'duration', 'course', 'topic', 'session']
+        
+class myUserDBForm(forms.ModelForm):
+    class Meta:
+        model = myUserDB
+        fields = ['bio', 'timezone']
