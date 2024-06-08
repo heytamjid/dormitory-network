@@ -8,6 +8,13 @@ from django.utils import timezone
 from .models import *
 from datetime import datetime
 from .forms import *
+import plotly.express as px
+import pandas as pd
+from datetime import timedelta
+import plotly.graph_objects as go
+from django.db.models import F, Sum, DurationField, ExpressionWrapper
+from django.db.models.functions import TruncDate
+
 
 
 
@@ -357,3 +364,138 @@ def edit_user(request, username):
     else:
         form = myUserDBForm(instance=user)
     return render(request, 'firstApp/edit_user.html', {'form': form})
+
+
+
+#data visualization part goes here
+def reportView(request):
+    return render(request, 'firstApp/report.html')
+
+
+def format_duration_to_hhmm(hours):
+    """Convert duration from hours to hh:mm format."""
+    total_minutes = int(hours * 60)
+    hh = total_minutes // 60
+    mm = total_minutes % 60
+    return f"{hh:02}:{mm:02}"
+
+
+
+def get_chart_data(request):
+    user = request.user
+    start_date = request.POST.get('start_date')
+    print(start_date)
+    end_date = request.POST.get('end_date')
+    print(end_date)
+    print("TESTing if start date & end date working")
+
+    if start_date and end_date:
+        tracked_times = TrackedTimeDB.objects.filter(
+            user=user,
+            startTime__date__gte=start_date,
+            endTime__date__lte=end_date
+        )
+    else:
+        tracked_times = TrackedTimeDB.objects.filter(user=user)
+        
+        
+    # First, annotate the queryset to add the total duration for each course on each day
+    annotated_tracked_times = (
+        TrackedTimeDB.objects
+        .annotate(date=TruncDate('startTime'))
+        .values('date', 'course') #this is grouped data. grouped by date and course
+        .annotate(
+            total_course_duration=Sum(
+                ExpressionWrapper(
+                    F('duration'),
+                    output_field=DurationField()
+                )
+            )
+        )
+    )
+
+    # Create a dictionary to lookup
+    total_duration_per_course_per_day = {
+        (entry['date'], entry['course']): entry['total_course_duration'].total_seconds() / 3600
+        for entry in annotated_tracked_times
+    }
+
+    data = []
+    for track in tracked_times:
+        course_name = track.course.name if track.course else 'Uncategorized'
+        track_date = track.startTime.date()
+        total_duration = total_duration_per_course_per_day.get((track_date, track.course_id), 0)
+        data.append({
+            'date': track_date,
+            'course': course_name,
+            'duration': track.duration.total_seconds() / 3600,
+            'totalCourseDurationForThisDay': format_duration_to_hhmm(total_duration)
+        })
+
+    df = pd.DataFrame(data)
+    print(df)
+
+    # # Create a date range from start_date to end_date
+    # if start_date and end_date:
+    #     all_dates = pd.date_range(start=start_date, end=end_date).date
+    # else:
+    #     # If no dates are provided, default to the range of tracked_times dates
+    #     if not df.empty:
+    #         all_dates = pd.date_range(start=df['date'].min(), end=df['date'].max()).date
+    #     else:
+    #         all_dates = []
+
+    # # Create a DataFrame to ensure all dates are included
+    # all_dates_df = pd.DataFrame({'date': all_dates})
+
+    # if not df.empty:
+    #     # Merge the tracked times data with all dates
+    #     df = all_dates_df.merge(df, on='date', how='left')
+    #     # Fill missing duration values with 0
+    #     df['duration'] = df['duration'].fillna(0)
+    #     # Fill missing course values with 'No Data'
+    #     df['course'] = df['course'].fillna('No Data')
+    # else:
+    #     # If no data, create an empty DataFrame with all dates and zero durations
+    #     df = all_dates_df
+    #     df['duration'] = 0
+    #     df['course'] = 'No Data'
+        
+        
+
+    fig = px.bar(
+        df,
+        x='date',
+        y='duration',
+        color='course',
+        labels={'duration': 'Hours', 'date': 'Date'},
+        title='Time Spent on Courses',
+        #hover_data={'date':True, 'course':True, 'duration':False, 'totalCourseDurationForThisDay':True}, 
+        custom_data=['course', 'totalCourseDurationForThisDay']
+        
+        
+    )
+    
+    #Update traces to include the hovertemplate
+    fig.update_traces(hovertemplate=
+        '<b>Date: %{x} </b><br><br>' +
+        'Course: %{customdata[0]}<br>' +
+        'Duration: %{customdata[1]} hours<br>'+
+        '<extra></extra>' #empty extra tag to remove the trace name
+    )
+
+
+    # # Update the x-axis to show dates as categories and reduce density
+    # fig.update_xaxes(
+    #     #type='category',
+    #     tickangle=45,
+    #     tickmode='array',
+    #     tickvals=[str(date) for i, date in enumerate(all_dates) if i % (len(all_dates) // 20 + 1) == 0]  
+    # )
+    
+    
+    chart_html = fig.to_html(full_html=False)
+
+    response = HttpResponse(chart_html)
+
+    return response

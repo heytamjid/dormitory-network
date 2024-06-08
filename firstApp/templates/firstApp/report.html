@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+
+{% block body %}
+    <h1>Select Date Range</h1>
+    <form id="date-range-form">
+        {% csrf_token %}
+        <label for="start-date">Start Date:</label>
+        <input type="date" id="start-date" name="start_date">
+        <label for="end-date">End Date:</label>
+        <input type="date" id="end-date" name="end_date">
+        <button type="submit"
+        hx-post="{% url 'get_chart_data' %}" hx-trigger="click,load,submit" hx-target="#chart-container" hx-swap="innerHTML">Filter</button>
+        {% comment %} LESSON: use hx-post instead of hx-get if you want to send HTML form data from template to backend {% endcomment %}
+    </form>
+
+    <div id="chart-container" > </div>
+
+{% endblock %}
