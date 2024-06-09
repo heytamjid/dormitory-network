@@ -26,7 +26,7 @@ urlpatterns = [
     path('entry/topic/<int:pk>/', views.renderEntrybyTopic, name='renderEntrybyTopic'),
     
     path('report/', views.reportView, name='report'),
-    path('get-chart-data/', views.get_chart_data, name='get_chart_data'),
+    path('get-chart-data/', views.get_bar_chart_data, name='get_bar_chart_data'),
     
     
 ]  + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
