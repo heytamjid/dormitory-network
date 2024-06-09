@@ -386,9 +386,9 @@ def get_bar_chart_data(request):
     # for future reff: https://chatgpt.com/share/701af340-a3c2-4603-9ab4-8d66104743f9
     user = request.user
     start_date = request.POST.get('start_date') #so we are getting the start date from the frontend. #start_date is the NAME of the INPUT TAG in the report.html. The request method must be POST in HTMX
-    print(start_date)
+    #print(start_date)
     end_date = request.POST.get('end_date')
-    print(end_date)
+    #print(end_date)
     #print("TESTing if start date & end date working")
 
     if start_date and end_date:
@@ -417,24 +417,41 @@ def get_bar_chart_data(request):
         )
     )
     #print(TrackedTimeDB.objects.annotate(date=TruncDate('startTime')).values('date', 'course'))
+    
+    #we can not aggregate i.e. sum on another aggregation i.e. sum values btw in django ORM
+    # Another annotation. Calculating the total tracked duration per day
+    total_tracked_duration_per_day = (
+    TrackedTimeDB.objects
+    .annotate(date=TruncDate('startTime')) 
+    .values('date')  # Group by date only
+    .annotate(
+        total_tracked_duration_per_day=Sum('duration', output_field=DurationField())  # Sum the duration for each date
+        )
+    )  
+    print(total_tracked_duration_per_day)  
 
     # Create a dictionary to lookup
     total_duration_per_course_per_day = {
         (entry['date'], entry['course']): entry['total_course_duration'].total_seconds() / 3600 #key is a tuple of date and course. value is the total duration in hours
         for entry in annotated_tracked_times
     }
+    
+    #Creating another dictioanry for the second annotation
+    total_tracked_duration_per_day = {
+        entry['date']: entry['total_tracked_duration_per_day'].total_seconds() / 3600
+        for entry in total_tracked_duration_per_day
+    }
 
     #preparing the data for the plot
     data = [] #empty list
     for track in tracked_times:
-        course_name = track.course.name if track.course else 'Uncategorized'
         track_date = track.startTime.date() 
-        total_duration = total_duration_per_course_per_day.get((track_date, track.course_id), 0) #looking up the dictioanry, default to 0 if not found
         data.append({ 
             'date': track_date, # which will be plotted in x axis
-            'course': course_name, #which will be divided into colors
+            'course': track.course.name if track.course else 'Uncategorized', #which will be divided into colors
             'duration': track.duration.total_seconds() / 3600, # will be plotted in the y axis
-            'totalCourseDurationForThisDay': format_duration_to_hhmm(total_duration) #will be shown on hover
+            'totalDurationForThisDay': format_duration_to_hhmm(total_tracked_duration_per_day.get(track_date, 0)), 
+            'totalCourseDurationForThisDay': format_duration_to_hhmm(total_duration_per_course_per_day.get((track_date, track.course_id), 0)) #will be shown on hover # #looking up the dictioanry, default to 0 if not found
         })
 
     df = pd.DataFrame(data) #converting the list of dictionaries to a pandas dataframe as that's convenient #dataframe is a 2D labeled DS with columns of potentially different types.
@@ -469,7 +486,7 @@ def get_bar_chart_data(request):
         
     
     
-    df['this_session_hours'] = df['duration'].apply(format_duration_to_hhmm) #adding new column to the dataframe #note .apply() on a dataframe column # the result of the apply function does not get stored in df['duration'], it gets stored in the lhs i.e. the new column
+    df['this_session_hours'] = df['duration'].apply(format_duration_to_hhmm) #adding a new column to the dataframe #note .apply() on a dataframe column # the result of the apply function does not get stored in df['duration'], it gets stored in the lhs i.e. the new column
     # print(df['duration'])
     
         
@@ -482,16 +499,14 @@ def get_bar_chart_data(request):
         labels={'duration': 'Hours You Grinded', 'date': 'Days Gone', 'course': 'Courses You Aspired'},
         title='Your Learning Journey in Hours', 
         #hover_data={'date':True, 'course':True, 'duration':False, 'totalCourseDurationForThisDay':True},
-        custom_data=['course', 'totalCourseDurationForThisDay', 'this_session_hours'] #custom_data is used to add additional data to the hovertemplate #the custom data must be in the dataframe i.e. df here
+        custom_data=['course', 'totalCourseDurationForThisDay', 'totalDurationForThisDay', 'this_session_hours'] #custom_data is used to add additional data to the hovertemplate #the custom data must be in the dataframe i.e. df here
     )
     
     #hovertemplate is used to customize the hover text that appears when you hover over the trace in the plot #Note syntax
     fig.update_traces(hovertemplate= 
-        '<b>Date: %{x} </b><br>' +
-        'Total Studied: %{} hours<br><br>' +
-        'Course: %{customdata[0]}<br>' + #this is how you plug in the custom data
-        'Duration on this course today: %{customdata[1]} hours<br>'+
-        'Duration on this course this session: %{customdata[2]} hours<br>'+
+        '<b>%{x} </b> -- Total Recorded <b>%{customdata[2]}</b> hours<br><br>' +
+        'Studied <b>%{customdata[0]}  %{customdata[1]} </b>hours. <br>'+
+        'This session comprises of %{customdata[3]} hours.<br>'+
         '<extra></extra>' #empty extra tag removes the trace name. note that.
     )
 
