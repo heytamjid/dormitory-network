@@ -8,10 +8,10 @@ from django.utils import timezone
 from .models import *
 from datetime import datetime
 from .forms import *
-import plotly.express as px
-import pandas as pd
+import plotly.express
+import pandas
 from datetime import timedelta
-import plotly.graph_objects as go
+import plotly.graph_objects
 from django.db.models import F, Sum, DurationField, ExpressionWrapper
 from django.db.models.functions import TruncDate
 
@@ -111,7 +111,7 @@ def addTopic (request):
 def start_timer(request):
     start_time = timezone.now()
     request.session['start_time'] = start_time.timestamp() #user refresh dile ki memory leak hobe??
-    return HttpResponse("<button type='submit' id='endTimerButton'  hx-vals='js:{selectedCourse : document.getElementById(&#39;courseSelect&#39;).value, selectedTopic : document.getElementById(&#39;topicSelect&#39;).value, selectedDescription : document.getElementById(&#39;sessionDescription&#39;).value}' hx-trigger='click' hx-get='/endTimerClicked/' hx-target='#endTimerButton' hx-swap='outerHTML' class='text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2'>  Stop Tracking </button>")
+    return HttpResponse("<button type='submit' id='endTimerButton'  hx-vals='js:{selectedCourse : document.getElementById(&#39;courseSelect&#39;).value, selectedTopic : document.getElementById(&#39;topicSelect&#39;).value, selectedDescription : document.getElementById(&#39;sessionDescription&#39;).value}' hx-trigger='click' hx-get='/endTimerClicked/' hx-target='#endTimerButton' hx-swap='outerHTML' class='text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-lg text-sm plotly.express-5 py-2.5 text-center me-2 mb-2'>  Stop Tracking </button>")
     #note the &#39; is used to escape the single quote in the string. It is used because the string is enclosed in single quotes. If the string was enclosed in double quotes, then we would have used &quot; to escape the double quote.
     #also single quote is typically  used inside doulbe quote
     #also json format must be in double quote. so we can't use double quote inside double quote. so we use single quote inside double quote.
@@ -155,7 +155,7 @@ def stop_timer(request):
     del request.session['start_time']
     
     
-    htmlcontent = "<button  type='submit' id='startTimerButton' hx-get='/startTimerClicked/' hx-target='#startTimerButton' hx-swap='outerHTML' class='text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2'> Start Tracking </button>"
+    htmlcontent = "<button  type='submit' id='startTimerButton' hx-get='/startTimerClicked/' hx-target='#startTimerButton' hx-swap='outerHTML' class='text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm plotly.express-5 py-2.5 text-center me-2 mb-2'> Start Tracking </button>"
     response = HttpResponse(htmlcontent)
     response['HX-Trigger'] = 'renderEntryzz' # upon receiving the response, it (the response) will trigger that [<div id = "trackedTime" hx-select="#onlyEntries2" hx-get="/endTimerClicked/renderEntry/" hx-trigger="renderEntryzz from:body">] in dashboard.html, which (that div) will then make a get request to /endTimerClicked/renderEntry/ and replace the content of itself with the response of that get request to the /endTimerClicked/renderEntry/ endpoint
     #https://chat.openai.com/share/873634e8-2731-47a5-af00-c9fb598beb2e
@@ -372,12 +372,13 @@ def reportView(request):
     return render(request, 'firstApp/report.html')
 
 
-def format_duration_to_hhmm(hours):
-    """Convert duration from hours to hh:mm format."""
+def format_hours_to_hhmm(hours):
+    if (hours != hours):  #SAFETY #NaN check #if (hours == NaN) will give your error. you cannot use the equality operator == to compare to NaN because NaN is not equal to anything, including itself.
+        hours = 0
     total_minutes = int(hours * 60)
     hh = total_minutes // 60
     mm = total_minutes % 60
-    return f"{hh:02}:{mm:02}"
+    return f"{hh:02}:{mm:02}" #upto 2 decimal points
 
 
 @login_required
@@ -403,7 +404,7 @@ def get_bar_chart_data(request):
         
     # First, annotate the queryset to add the total duration for each course on each day as that will be shown on hover
     #https://docs.djangoproject.com/en/5.0/topics/db/aggregation/
-    annotated_tracked_times = (
+    annotated_tracked_times_w_date_course_duration = (
         TrackedTimeDB.objects
         .annotate(date=TruncDate('startTime')) #TruncDate is a function that truncates the datetime field to the date part only. #so we are adding a new field 'date' to the queryset.
         .values('date', 'course') #.values('date', 'course') changes the queryset to a valuesqueryset containing date & course #When you call values(), the resulting queryset contains QUERYSETS OF DICTIONARies (which is a subclass of querysets) instead of model instances.
@@ -420,26 +421,26 @@ def get_bar_chart_data(request):
     
     #we can not aggregate i.e. sum on another aggregation i.e. sum values btw in django ORM
     # Another annotation. Calculating the total tracked duration per day
-    total_tracked_duration_per_day = (
+    dict_duration_per_day = (
     TrackedTimeDB.objects
     .annotate(date=TruncDate('startTime')) 
     .values('date')  # Group by date only
     .annotate(
-        total_tracked_duration_per_day=Sum('duration', output_field=DurationField())  # Sum the duration for each date
+        dict_duration_per_day=Sum('duration', output_field=DurationField())  # Sum the duration for each date
         )
     )  
-    print(total_tracked_duration_per_day)  
+    #print(dict_duration_per_day)  
 
     # Create a dictionary to lookup
-    total_duration_per_course_per_day = {
+    dict_duration_per_course_per_day = {
         (entry['date'], entry['course']): entry['total_course_duration'].total_seconds() / 3600 #key is a tuple of date and course. value is the total duration in hours
-        for entry in annotated_tracked_times
+        for entry in annotated_tracked_times_w_date_course_duration
     }
     
     #Creating another dictioanry for the second annotation
-    total_tracked_duration_per_day = {
-        entry['date']: entry['total_tracked_duration_per_day'].total_seconds() / 3600
-        for entry in total_tracked_duration_per_day
+    dict_duration_per_day = {
+        entry['date']: entry['dict_duration_per_day'].total_seconds() / 3600
+        for entry in dict_duration_per_day
     }
 
     #preparing the data for the plot
@@ -449,79 +450,82 @@ def get_bar_chart_data(request):
         data.append({ 
             'date': track_date, # which will be plotted in x axis
             'course': track.course.name if track.course else 'Uncategorized', #which will be divided into colors
-            'duration': track.duration.total_seconds() / 3600, # will be plotted in the y axis
-            'totalDurationForThisDay': format_duration_to_hhmm(total_tracked_duration_per_day.get(track_date, 0)), 
-            'totalCourseDurationForThisDay': format_duration_to_hhmm(total_duration_per_course_per_day.get((track_date, track.course_id), 0)) #will be shown on hover # #looking up the dictioanry, default to 0 if not found
+            'sessionDuration': track.duration.total_seconds() / 3600, # will be plotted in the y axis
+            'totalDurationPerDay': (dict_duration_per_day.get(track_date, 0)), 
+            'totalDurationPerCoursePerDay': (dict_duration_per_course_per_day.get((track_date, track.course_id), 0)) #will be shown on hover # #looking up the dictioanry, default to 0 if not found
         })
 
-    df = pd.DataFrame(data) #converting the list of dictionaries to a pandas dataframe as that's convenient #dataframe is a 2D labeled DS with columns of potentially different types.
+    df = pandas.DataFrame(data) #converting the list of dictionaries to a pandas dataframe as that's convenient #dataframe is a 2D labeled DS with columns of potentially different types.
     #print(df)
 
     # As we want to show ALL THE DATES in the range on the x axis, even if corresponding y axis value is 0, creating a date range from start_date to end_date
     if start_date and end_date:
-        all_dates = pd.date_range(start=start_date, end=end_date).date #.date is used to get the date part only #pd.date_range() is used to generate a range of dates
+        all_dates = pandas.date_range(start=start_date, end=end_date).date #.date is used to get the date part only #pandas.date_range() is used to generate a range of dates
     elif start_date:
-        all_dates = pd.date_range(start=start_date, end=df['date'].max()).date
+        all_dates = pandas.date_range(start=start_date, end=df['date'].max()).date
     elif end_date:       
-        all_dates = pd.date_range(start=df['date'].min(), end=end_date).date    
+        all_dates = pandas.date_range(start=df['date'].min(), end=end_date).date    
     else:
         if not df.empty:
-            all_dates = pd.date_range(start=df['date'].min(), end=df['date'].max()).date
+            all_dates = pandas.date_range(start=df['date'].min(), end=df['date'].max()).date
         else:
             all_dates = [] #safety
 
     #print(all_dates)
-    all_dates_df = pd.DataFrame({'date': all_dates}) #so currently only one column exists named 'date'
-    #print(all_dates_df)
+    all_dates_df = pandas.DataFrame({'date': all_dates}) #so currently only one column exists named 'date'
+    ##print(all_dates_df)
 
     # Merge the all dates range stored in all_dates_df we just created with the tracked times data stored in df (where x exists only if y exists)
     if not df.empty:
         df = all_dates_df.merge(df, on='date', how='left') #left is all_dates_df, right is df. # merged data gonna be stored in df. #left join is used to keep all the dates in all_dates_df even if there is no corresponding data in df.
-        df['duration'] = df['duration'].fillna(0) # Fill missing duration values with 0
+        df['sessionDuration'] = df['sessionDuration'].fillna(0) # Fill missing sessionDuration values with 0
         df['course'] = df['course'].fillna('Uncategorized') # Fill missing course values with 'No Data'
     else: #safety
         df = all_dates_df
-        df['duration'] = 0
+        df['sessionDuration'] = 0
         df['course'] = 'Uncategorized'
         
     
+    df['hhmmModifiedSessionDuration'] = df['sessionDuration'].apply(format_hours_to_hhmm) #adding a new column to the dataframe #note .apply() on a dataframe column # the result of the apply function does not get stored in df['duration'], it gets stored in the lhs i.e. the new column
+    df['courseDurationPercentagePerDay'] = (df['totalDurationPerCoursePerDay'] / df['totalDurationPerDay']) * 100 
     
-    df['this_session_hours'] = df['duration'].apply(format_duration_to_hhmm) #adding a new column to the dataframe #note .apply() on a dataframe column # the result of the apply function does not get stored in df['duration'], it gets stored in the lhs i.e. the new column
-    # print(df['duration'])
+    df['totalDurationPerDay'] = df['totalDurationPerDay'].apply(format_hours_to_hhmm)
+    df['totalDurationPerCoursePerDay'] = df['totalDurationPerCoursePerDay'].apply(format_hours_to_hhmm) #df['hhmmModifiedtotalDurationPerCoursePerDay'] = format_hours_to_hhmm(df['totalDurationPerCoursePerDay'])  error is occurring because the `format_hours_to_hhmm` function is expecting a single value, but it is receiving a pandas Series object `df['totalDurationPerCoursePerDay']`. To fix this, you can modify the code to apply the function to each value in the Series using the `apply` method. Made changes.
+    print(df['totalDurationPerCoursePerDay'])
     
-        
+    
     #now let's feeeeed into it, fianllyyyy
-    fig = px.bar(
+    fig = plotly.express.bar(
         df,
-        x='date',
-        y='duration',
+        x='date', #we are feeding the axes with columns of the dataframe. which can be accessed as print(df['duration']) 
+        y='sessionDuration',
         color='course', #the bars will be colored according to the course
-        labels={'duration': 'Hours You Grinded', 'date': 'Days Gone', 'course': 'Courses You Aspired'},
+        labels={'sessionDuration': 'Hours You Grinded', 'date': 'Days Gone', 'course': 'Courses You Aspired'},
         title='Your Learning Journey in Hours', 
-        #hover_data={'date':True, 'course':True, 'duration':False, 'totalCourseDurationForThisDay':True},
-        custom_data=['course', 'totalCourseDurationForThisDay', 'totalDurationForThisDay', 'this_session_hours'] #custom_data is used to add additional data to the hovertemplate #the custom data must be in the dataframe i.e. df here
+        #hover_data={'date':True, 'course':True, 'sessionDuration':False, 'totalDurationPerCoursePerDay':True},
+        custom_data=['course', 'totalDurationPerCoursePerDay', 'totalDurationPerDay', 'hhmmModifiedSessionDuration', 'courseDurationPercentagePerDay'] #custom_data is used to add additional data to the hovertemplate #the custom data must be in the dataframe i.e. df here
     )
     
     #hovertemplate is used to customize the hover text that appears when you hover over the trace in the plot #Note syntax
     fig.update_traces(hovertemplate= 
         '<b>%{x} </b> -- Total Recorded <b>%{customdata[2]}</b> hours<br><br>' +
-        'Studied <b>%{customdata[0]}  %{customdata[1]} </b>hours. <br>'+
+        'Studied <b>%{customdata[0]}  %{customdata[1]} </b>hours (%{customdata[4]:.2f}%) <br>'+
         'This session comprises of %{customdata[3]} hours.<br>'+
         '<extra></extra>' #empty extra tag removes the trace name. note that.
     )
 
+    '''
+    #Sort the dates
+    #sorted_dates = sorted(all_dates)
+    #Then sorted_dates would replace the all_dates in the tickvals in the following fig.update_xaxes() call.
+    #But I don't think it's necessary to sort the dates as they are already sorted in the all_dates_df dataframe.
+    '''
 
-    # Sort the dates
-    sorted_dates = sorted(all_dates)
-
-    # Update the x-axis with sorted dates
     fig.update_xaxes(
         tickangle=45,
-        tickmode='array',
-        tickvals=[str(date) for i, date in enumerate(sorted_dates) if i % (len(sorted_dates) // 20 + 1) == 0]
-    )
-
-    
+        tickmode='array', #https://plotly.com/python/tick-formatting/
+        tickvals=[str(date) for i, date in enumerate(all_dates) if i % ((len(all_dates) // 20) + 1) == 0] # List Comprehension with Condition. #max 19 ta tick dekhabe # is floor division operator which ROUNDS the answer to nearest integer 
+    )  
     
     chart_html = fig.to_html(full_html=False)
 
