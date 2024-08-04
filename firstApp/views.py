@@ -14,6 +14,16 @@ from datetime import timedelta
 import plotly.graph_objects
 from django.db.models import F, Sum, DurationField, ExpressionWrapper
 from django.db.models.functions import TruncDate
+import json
+
+def helloWebpack (request):
+    context = {
+        'title' : 'no country for the old man',
+        'type' : 'movie',
+    }
+    print (context)
+    
+    return render(request, "hello_webpack.html", context); 
 
 
 

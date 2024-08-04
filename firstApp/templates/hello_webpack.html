@@ -1,0 +1,14 @@
+{% load static %}
+<!doctype html>
+<html>
+  <head>
+    <title>Getting Started with Django and Webpack</title>
+  </head>
+  <body>
+    {{title}}
+    <div id="root"></div>
+    {{ title|json_script:'title' }}
+    {{ type|json_script:'type' }}
+    <script src="{% static 'index-bundle.jsx' %}"></script>
+  </body>
+</html>

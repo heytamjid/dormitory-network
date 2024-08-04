@@ -27,6 +27,7 @@ urlpatterns = [
     
     path('report/', views.reportView, name='report'),
     path('get-chart-data/', views.get_bar_chart_data, name='get_bar_chart_data'),
+    path('hello-webpack/', views.helloWebpack, name='hello-webpack'),
     
     
 ]  + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
