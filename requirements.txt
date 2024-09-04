@@ -1,5 +1,5 @@
-pip install django-timezone-field
-python -m pip install django-debug-toolbar
-pip install plotly
-pip install dash
-pip install pandas
+django-timezone-field
+django-debug-toolbar
+plotly
+dash
+pandas

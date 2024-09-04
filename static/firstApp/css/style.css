@@ -1,0 +1,176 @@
+/*MODULE BASIC*/
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f4e3;
+}
+
+html{
+    background-color: #0055f8;
+    /* margin: 0 auto;  Center horizontally  but but but as  in later part of the css, .c{margin-left and margin-right was set to 0.5em}, so this auto was overwritten and hence didn't work} */
+    
+}
+
+.c {
+  
+    max-width: 1800px;
+    margin-left: auto; /*to overwrite it, you have to explicitly write margin-left whrere needed. shorthand margin wont work*/
+    margin-right: auto; /* Center horizontally -- margin-left and margin-right equal auto */
+    /* auto is a keyword that tells the browser to automatically calculate a value based on the available space or content */
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    /* border: 1px solid red; */
+}
+
+
+
+
+
+
+
+
+
+
+
+/*MODULE LANDING PAGE*/
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.header .site-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    transition: font-style 0.2s;
+}
+.header .site-name:hover {
+    color: #0055f8;
+    font-style: italic;
+}
+.header .nav-links {
+    list-style: none;
+    display: flex;
+    gap: 1em;
+}
+.header .nav-links a {
+    padding: 0.5em;
+    transition: font-style 0.2s;
+    font-size: 1.2rem;
+    color: #555;
+}
+.header .nav-links a:hover {
+    background-color: #0055f8;
+    font-style: italic;
+    color: white; 
+    border-radius: 5px;
+}
+
+
+
+
+
+/* Center the hero section vertically and horizontally */
+.hero {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;    
+}
+
+.hero-inner {
+    max-width: 800px; /*hero is need to be width less with high padding*/
+    /* background-color: #0055f8; note this color will only be reflected in this particularsclass, will not be reflected in the child classes. it happens with element selectors ig. */
+
+}
+
+.hero-title {
+    font-size: 4rem;
+    font-weight: bold;
+    margin-bottom: 0em;
+   
+}
+
+/* Style for the hero tagline */
+.hero-text {
+    font-size: 1.2rem;
+    color: #555;
+    margin-top: 0em;
+    padding-top: 0em;
+   
+
+    /* max-width: 45ch; //max-width add kora matro flex er subidha haraba */
+}
+
+.makeItBlue
+{
+    color: #0055f8;
+}
+
+
+.engageBtn
+{   
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;    
+}
+
+
+
+
+
+
+/*MODULE MEDIA QUERY*/
+/* 3xl */
+@media (max-width: 1800px) {
+    .c {
+        max-width: 1536px;
+    }
+}
+
+/* 2xl */
+@media (max-width: 1536px) {
+    .c {
+        max-width: 1280px;
+    }
+}
+
+/* xl */
+@media (max-width: 1280px) {
+    .c {
+        max-width: 1024px;
+    }
+}
+
+/* lg */
+@media (max-width: 1024px) {
+    .c {
+        max-width: 768px;
+    }
+}
+
+/* md */
+@media (max-width: 768px) {
+    .c {
+        max-width: 640px;
+    }
+}
+
+/* sm */
+@media (max-width: 640px) {
+    .c {
+        max-width: 475px;
+    }
+}
+
+/* xs */
+@media (max-width: 475px) {
+    .c {
+        width: 100%;
+    }
+}

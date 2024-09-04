@@ -3,11 +3,29 @@
 
 {% block body %}
 
-<b>Welcome to Your Dorm, Your Second Home</b>
+<header class="header c">
+    <div><h1 class="site-name c">DORMITORY</h1></div>
+    <nav>
+        <ul class="nav-links c">
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Report</a></li>
+            <li><a href="#">About</a></li>
+        </ul>
+    </nav>
+</header>
 
-<a href=" {% url "signup" %}" class=" text-white relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-cyan-500 to-blue-500 group-hover:from-cyan-500 group-hover:to-blue-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-cyan-200 dark:focus:ring-cyan-800"> Sign Up </a>
-<a href="{% url "login" %}" class="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-teal-300 to-lime-300 group-hover:from-teal-300 group-hover:to-lime-300 dark:text-white dark:hover:text-gray-900 focus:ring-4 focus:outline-none focus:ring-lime-200 dark:focus:ring-lime-800"> Log In </a>
-</br>
-<p>Dormitory Network is a time-tracking webapp to neatly record your academic/work hours & generate report & insights based on the data. It also aims to connect your fellow mates studying the same majors/interests.</p>
+
+<section class="hero c">
+    <div class="hero-inner c">
+        <h1 class="hero-title c">Your <span class="makeItBlue">Dorm</span> </br> Your Second Home</h1>
+        <p class="hero-text c"><span class="makeItBlue">Dormitory</span> is a time-tracking webapp to neatly record your academic/work-hours and generate report & insights based on the data.</p>       
+    </div>
+</section>
+
+
+<section class="engageBtn c">
+    <a href="{% url "signup" %}"> <button class="mr-[0.3em] px-6 py-2 border-2 border-[#0055f8] rounded-md text-[#555] bg-transparent text-[1.3rem] hover:bg-[#0055f8] hover:text-white hover:italic transition-colors duration-200" type="button">Sign Up</button> </a>
+    <a href="{% url "login" %}"> <button class="ml-[0.3em] px-6 py-2 border-2 border-[#0055f8] rounded-md text-[#555] bg-transparent text-[1.3rem] hover:bg-[#0055f8] hover:text-white hover:italic transition-colors duration-200" type="button">Log In</button> </a>
+</section>
 
 {% endblock %}
