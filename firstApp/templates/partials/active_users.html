@@ -4,8 +4,11 @@
     {% comment %} {% block body %} {% endcomment %}
     <h1 style="font-size:24px;">Active Users</h1>
     <ul>
-        {% for username in active_usernames %}
-            <li>{{ username }}</li>
+        {% for each in active_user_data %}
+        <li><a href="{% url 'user_profile' each.user_id %}">{{ each.username }}</a> 
+        -> {{ each.course_name }}/{{ each.topic_name }}
+        <br> active for {{ each.time_elapsed_minutes }} minutes
+        </li>
         {% endfor %}
     </ul>
     {% comment %} {% endblock %} {% endcomment %}

@@ -20,12 +20,15 @@
 
 
     <header class="header c">
-        <div><a href="{% url 'dashboard'%}"><h1 class="site-name c">Back To Dashboard</h1></a></div>
+        <div><a href="{% url 'report'%}"><h1 class="site-name c">Your Report</h1></a></div>
         <nav>
             <ul class="nav-links c">
+                <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li><a href="{% url 'user_profile' user.username %}">Profile</a></li>
                 <li><a href="{% url 'report' %}">Report</a></li>
                 <li><a href="{% url 'addCourse'%}">Add Course</a></li>
                 <li><a href="{% url 'addTopic'%}">Add Topic</a></li>
+                <li><a href="{% url 'active_users' %}">Active Users</a></li>
                 <li><a href="{% url 'logout' %}">Log Out</a></li>
             </ul>
         </nav>

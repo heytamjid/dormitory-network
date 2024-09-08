@@ -120,6 +120,26 @@ def addTopic (request):
 @login_required
 def start_timer(request):
     start_time = timezone.now()
+    
+    
+    selectedCourse = request.GET.get('selectedCourse') 
+    print("Selected Courseeeeeeeeeeeeeeeeeeeeeeeeeeee:", selectedCourse)
+    selectedTopic = request.GET.get('selectedTopic') #so we just got the value - which is defined as primary key or '' in the html file. #selectedTopic is the name of the select tag in the dashboard.html   
+    print("Selected Topicccccccccccccccccccccccccccccc:", selectedTopic)
+    #works upto this line this line 
+    
+    course = Course.objects.get(pk = selectedCourse) if (selectedCourse!='') else None #, mann no trailing comma otherwise it will be a tuple
+    topic = Topic.objects.get(pk = selectedTopic) if (selectedTopic!='') else None
+    
+    print(course)
+    print(topic)
+    print("laaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+    if course:
+        request.session['selected_course'] = course.name
+    if topic:
+        request.session['selected_topic'] = topic.name
+    
+    
     request.session['start_time'] = start_time.timestamp() #user refresh dile ki memory leak hobe??
     return HttpResponse("<button type='submit' id='endTimerButton'  hx-vals='js:{selectedCourse : document.getElementById(&#39;courseSelect&#39;).value, selectedTopic : document.getElementById(&#39;topicSelect&#39;).value, selectedDescription : document.getElementById(&#39;sessionDescription&#39;).value}' hx-trigger='click' hx-get='/endTimerClicked/' hx-target='#endTimerButton' hx-swap='outerHTML' class='text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-lg text-sm plotly.express-5 py-2.5 text-center me-2 mb-2'>  Stop Tracking </button>")
     #note the &#39; is used to escape the single quote in the string. It is used because the string is enclosed in single quotes. If the string was enclosed in double quotes, then we would have used &quot; to escape the double quote.
@@ -135,11 +155,11 @@ def stop_timer(request):
     
     
     selectedCourse = request.GET.get('selectedCourse') 
-    print("Selected Course:", selectedCourse)
+    print("Selected Coursexxxxxxxxxxxxxxxxx:", selectedCourse)
     selectedTopic = request.GET.get('selectedTopic') #so we just got the value - which is defined as primary key or '' in the html file. #selectedTopic is the name of the select tag in the dashboard.html
     
     
-    print("Selected Topic:", selectedTopic)
+    print("Selected Topicyyyyyyyyyyyyyyyyyyy:", selectedTopic)
     #so primary key for each table or model is started from 1 to infinity at its own table. So, if we want to save the selected course and topic in the TrackedTimeDB model, we need to get the primary key of the selected course and topic.
     #problem: deal with unselected course that should show up as None in the database. Also deal with unselected topic that should show up as None in the database..
     #problem: when course is back to unselected in frontend, topics NOT associated with any course should show up in the topic dropdown.
@@ -163,9 +183,12 @@ def stop_timer(request):
     #Oldline of code with modelName.objects.create() #TrackedTimeDB.objects.create(user=request.user, startTime=datetime.fromtimestamp(start_time), endTime=datetime.fromtimestamp(end_time), duration=timezone.timedelta(seconds=duration), topic = Topic.objects.get(pk = selectedTopic) if (selectedTopic!='NONE') else None, session = selectedDescription) 
     
     del request.session['start_time']
+    if 'selected_course' in request.session:
+        del request.session['selected_course']
+    if 'selected_topic ' in request.session:
+        del request.session['selected_topic']    
     
-    
-    htmlcontent = "<button  type='submit' id='startTimerButton' hx-get='/startTimerClicked/' hx-target='#startTimerButton' hx-swap='outerHTML' class='text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm plotly.express-5 py-2.5 text-center me-2 mb-2'> Start Tracking </button>"
+    htmlcontent = "<button  type='submit' id='startTimerButton' hx-get='/startTimerClicked/' hx-target='#startTimerButton' hx-swap='outerHTML' hx-vals='js:{selectedCourse : document.getElementById(&#39;courseSelect&#39;).value, selectedTopic : document.getElementById(&#39;topicSelect&#39;).value, selectedDescription : document.getElementById(&#39;sessionDescription&#39;).value}'   class='text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm plotly.express-5 py-2.5 text-center me-2 mb-2'> Start Tracking </button>"
     response = HttpResponse(htmlcontent)
     response['HX-Trigger'] = 'renderEntryzz' # upon receiving the response, it (the response) will trigger that [<div id = "trackedTime" hx-select="#onlyEntries2" hx-get="/endTimerClicked/renderEntry/" hx-trigger="renderEntryzz from:body">] in dashboard.html, which (that div) will then make a get request to /endTimerClicked/renderEntry/ and replace the content of itself with the response of that get request to the /endTimerClicked/renderEntry/ endpoint
     #https://chat.openai.com/share/873634e8-2731-47a5-af00-c9fb598beb2e
@@ -211,7 +234,7 @@ def renderEntry (request):
             'topic_id': 0 if entry.topic is None else entry.topic.id,
             'course' : 'Unselected Course' if entry.course is None else entry.course.name, #Old code when trackedtimedb used to have only topic foreign key, and course was evaluated according to topic #'Unselected Course' if (entry.topic is None) else      'Unselected Course' if (entry.topic.course is None) else entry.topic.course.name, #condition validating.
             'topic': 'Unselected Topic' if entry.topic is None else entry.topic.name, #condition validating
-            'session': entry.session,
+            'session': entry.pk,
         })
 
     context = { #dictionary. unordered. key-value pairs. immutable. same type of data. {} 
@@ -302,7 +325,7 @@ def renderEntrybyTopic (request, pk):
     
     return render(request, 'firstApp/entries.html', context)
 
-
+'''#OLD CODE
 def active_users(request):
     #to work on later: https://chat.openai.com/share/6dce5375-0b7a-4c29-b301-92e6cb04f535 Title: Active Users
     active_sessions = Session.objects.filter(expire_date__gte=datetime.now())
@@ -314,6 +337,59 @@ def active_users(request):
             user = myUserDB.objects.get(pk=user_id)
             active_usernames.append(user.username)
     return render(request, 'partials/active_users.html', {'active_usernames': active_usernames})
+'''
+
+def active_users(request):
+    now = timezone.now().timestamp()
+    
+    active_sessions = Session.objects.filter(expire_date__gte=datetime.now())
+    active_user_data = []
+
+    for session in active_sessions:
+        session_data = session.get_decoded()
+
+        if 'start_time' in session_data:
+            user_id = session_data.get('_auth_user_id')
+            if user_id:
+                try:
+                    user = myUserDB.objects.get(pk=user_id)
+                    
+                    course = session_data.get('selected_course')
+                    topic = session_data.get('selected_topic')
+                    
+                    
+                    start_time = session_data['start_time']
+                    timedelta = int((now - start_time) / 60.0)
+                    
+                                    
+
+                    active_user_data.append({
+                        'username': user.username,
+                        'user_id' : user_id,
+                        'course_name': course,
+                        'topic_name': topic,
+                        'time_elapsed_minutes': timedelta
+                    })
+                except myUserDB.DoesNotExist:
+                    continue
+                
+    print((active_user_data))
+
+    return render(request, 'partials/active_users.html', {'active_user_data': active_user_data})
+
+
+def user_profile(request, user_id):
+    user = get_object_or_404(myUserDB, pk=user_id)
+    
+    user_data = {
+        'bio': user.bio,
+        'timezone': user.timezone,
+        'username': user.username
+    }
+        
+    # You can pass more data if needed, for example, user courses, etc.
+    return render(request, 'firstApp/userprofile.html', {'user': user_data})
+
 
 ##new days ahead
 

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %} <!-- Add this line IMPORTANT -->
+
+
+
+{% block body %}
+
+<header class="header c">
+    <div><a href="{% url 'user_profile' user.username %}"><h1 class="site-name c">{{user.username}}'s Profile</h1></a></div>
+    <nav>
+        <ul class="nav-links c">
+            <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li><a href="{% url 'user_profile' user.username %}">Profile</a></li>
+            <li><a href="{% url 'report' %}">Report</a></li>
+            <li><a href="{% url 'addCourse'%}">Add Course</a></li>
+            <li><a href="{% url 'addTopic'%}">Add Topic</a></li>
+            <li><a href="{% url 'active_users' %}">Active Users</a></li>
+            <li><a href="{% url 'logout' %}">Log Out</a></li>
+        </ul>
+    </nav>
+
+</header>
+ 
+<div class=" c px-[6em]">
+    <a class="makeItBlue engageBtn" href="{% url 'edit_user' user.username %}"><p>Edit Your Profile</p></a>
+    <p class="p-4"> About {{user.username}} / Biotext : {{user.bio}} </br> User Timezone: {{user.timezone}}</p>
+    <p class="p-4"> <b>Users Stat and Posts will appear here. </b></p>
+</div>
+
+
+{% endblock %}

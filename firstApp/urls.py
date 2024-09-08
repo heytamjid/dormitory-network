@@ -21,6 +21,8 @@ urlpatterns = [
     path('topic/<int:pk>/edit/', views.edit_topic, name='edit_topic'),
     path('course/<int:pk>/edit/', views.edit_course, name='edit_course'),
     path('edit/trackedtime/<int:pk>/', views.edit_trackedtime, name='edit_trackedtime'),
+    path('profile/<str:user_id>/', views.user_profile, name='user_profile'),
+
     path('profile/edit/<str:username>/', views.edit_user, name='edit_user'),
     path('entry/course/<int:pk>/', views.renderEntrybyCourse, name='renderEntrybyCourse'),
     path('entry/topic/<int:pk>/', views.renderEntrybyTopic, name='renderEntrybyTopic'),

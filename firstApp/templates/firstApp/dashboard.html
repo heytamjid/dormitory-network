@@ -7,9 +7,12 @@
     <div><a href="{% url 'dashboard'%}"><h1 class="site-name c">{{username}}'s Dashboard</h1></a></div>
     <nav>
         <ul class="nav-links c">
+          <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+          <li><a href="{% url 'user_profile' user.username %}">Profile</a></li>
             <li><a href="{% url 'report' %}">Report</a></li>
             <li><a href="{% url 'addCourse'%}">Add Course</a></li>
             <li><a href="{% url 'addTopic'%}">Add Topic</a></li>
+            <li><a href="{% url 'active_users' %}">Active Users</a></li>
             <li><a href="{% url 'logout' %}">Log Out</a></li>
         </ul>
     </nav>
@@ -46,7 +49,7 @@
     </div>
   
     <div class="item start-button mt-5">
-      <button hx-trigger="click" type="submit" id="startTimerButton" hx-get="/startTimerClicked/" hx-target="#startTimerButton" hx-swap="outerHTML" 
+      <button hx-trigger="click" type="submit" id="startTimerButton"  hx-vals='js:{selectedCourse : document.getElementById(&#39;courseSelect&#39;).value, selectedTopic : document.getElementById(&#39;topicSelect&#39;).value, selectedDescription : document.getElementById(&#39;sessionDescription&#39;).value}' hx-get="/startTimerClicked/" hx-target="#startTimerButton" hx-swap="outerHTML" 
         class="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
         Start Tracking
       </button>
