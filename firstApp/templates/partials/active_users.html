@@ -1,8 +1,12 @@
-
-    <h1>Active Users</h1>
+{% comment %} {% extends 'base.html' %}
+{% load static %} <!-- Add this line IMPORTANT --> {% endcomment %}
+    
+    {% comment %} {% block body %} {% endcomment %}
+    <h1 style="font-size:24px;">Active Users</h1>
     <ul>
         {% for username in active_usernames %}
             <li>{{ username }}</li>
         {% endfor %}
     </ul>
+    {% comment %} {% endblock %} {% endcomment %}
 

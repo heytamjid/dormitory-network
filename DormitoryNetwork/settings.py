@@ -40,7 +40,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'firstApp',
     'debug_toolbar',
+    'rest_framework',  
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+}
+
 
 
 ### this part is added to disable djdt###

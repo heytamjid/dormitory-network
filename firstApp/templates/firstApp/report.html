@@ -1,9 +1,41 @@
-{% extends 'base.html' %}
+{% load static %}
+
+<html lang="en">
 
 
-{% block body %}
-    <h1>Select Date Range</h1>
-    <form id="date-range-form">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+        <script src="https://cdn.tailwindcss.com"></script> 
+        <link rel="stylesheet" href="{% static '/firstApp/css/styleWObgcolor.css' %}">
+
+        <title>Dormitory</title>
+            
+        </head>
+
+
+<body>
+
+
+    <header class="header c">
+        <div><a href="{% url 'dashboard'%}"><h1 class="site-name c">Back To Dashboard</h1></a></div>
+        <nav>
+            <ul class="nav-links c">
+                <li><a href="{% url 'report' %}">Report</a></li>
+                <li><a href="{% url 'addCourse'%}">Add Course</a></li>
+                <li><a href="{% url 'addTopic'%}">Add Topic</a></li>
+                <li><a href="{% url 'logout' %}">Log Out</a></li>
+            </ul>
+        </nav>
+    </header>
+
+
+
+<div class="px-8 py-4">
+    <h1 style="font-size: 24px;" class="p-6">Select Date Range</h1>
+    <form class="p-6" id="date-range-form">
         {% csrf_token %}
         <label for="start-date">Start Date:</label>
         <input type="date" id="start-date" name="start_date">
@@ -15,5 +47,5 @@
     </form>
 
     <div id="chart-container" > </div>
-
-{% endblock %}
+</div>
+</body>

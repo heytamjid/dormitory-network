@@ -1,13 +1,24 @@
 {% extends 'base.html' %}
+{% load static %} <!-- Add this line IMPORTANT -->
+
 
 
 {% block body %}
 
-<h2>Login</h2>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Login</button>
-</form>
+<div class="halfhalfcontainer">
+  <div class="left-half">
+    <img src="{% static 'firstApp/images/bg1.jpeg' %}" alt="Background Image">
+  </div>
+  <div class="right-half">
+    <div class="login-form">
+      <h2 class="site-name">Login To Your Account</h2>
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="mt-[1em] px-1 py-1 border-2 border-[#0055f8] rounded-md text-[#555] bg-transparent text-[1.3rem] hover:bg-[#0055f8] hover:text-white hover:italic transition-colors duration-200" type="submit">Login</button>
+      </form>
+    </div>
+  </div>
+</div>
 
 {% endblock %}

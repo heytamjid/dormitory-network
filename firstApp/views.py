@@ -178,7 +178,7 @@ def stop_timer(request):
 def renderEntry (request):
     
     user = myUserDB.objects.get(username = request.user)
-    last_10_entries = TrackedTimeDB.objects.filter(user=user).order_by('-startTime')[:10]
+    last_10_entries = TrackedTimeDB.objects.filter(user=user).order_by('-startTime')[:100]
     
     # for entry in last_10_entries:
     #     localized_start_time = timezone.localtime(entry.startTime, timezone=user.timezone).strftime('%Y-%m-%d %H:%M')
@@ -228,7 +228,7 @@ def renderEntry (request):
 def renderEntrybyCourse (request, pk):
     
     user = myUserDB.objects.get(username = request.user)
-    last_10_entries = TrackedTimeDB.objects.filter(user=user, course=pk).order_by('-startTime')[:10]
+    last_10_entries = TrackedTimeDB.objects.filter(user=user, course=pk).order_by('-startTime')[:100]
     
     entries_data_modified_from_backend = [] #list. ordered list. indexing. mutable. different types of data. []
     for entry in last_10_entries:
@@ -240,7 +240,7 @@ def renderEntrybyCourse (request, pk):
         duration_minutes, duration_seconds = divmod(remaining_seconds, 60)  
                 
         # Append entry data to the list
-        entries_data_modified_from_backend.append ({ #so it is a list of dictionary!
+        entries_data_modified_from_backend.append ({ #so it is a list of dictionary
             'start_time': localized_start_time,
             'end_time': localized_end_time,
             'duration_hours': int(duration_hours),
@@ -268,7 +268,7 @@ def renderEntrybyCourse (request, pk):
 def renderEntrybyTopic (request, pk):
     
     user = myUserDB.objects.get(username = request.user)
-    last_10_entries = TrackedTimeDB.objects.filter(user=user, topic=pk).order_by('-startTime')[:10]
+    last_10_entries = TrackedTimeDB.objects.filter(user=user, topic=pk).order_by('-startTime')[:100]
     
     entries_data_modified_from_backend = [] #list. ordered list. indexing. mutable. different types of data. []
     for entry in last_10_entries:
@@ -395,6 +395,7 @@ def format_hours_to_hhmm(hours):
 def get_bar_chart_data(request):
     # for future reff: https://chatgpt.com/share/914d2657-75b0-4a26-bf93-28ca64ec38f1
     # for future reff: https://chatgpt.com/share/701af340-a3c2-4603-9ab4-8d66104743f9
+
     user = request.user
     start_date = request.POST.get('start_date') #so we are getting the start date from the frontend. #start_date is the NAME of the INPUT TAG in the report.html. The request method must be POST in HTMX
     #print(start_date)

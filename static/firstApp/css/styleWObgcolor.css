@@ -3,11 +3,9 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    background-color: #f5f4e3;
 }
 
 html{
-    background-color: #0055f8;
     /* margin: 0 auto;  Center horizontally  but but but as  in later part of the css, .c{margin-left and margin-right was set to 0.5em}, so this auto was overwritten and hence didn't work} */
     
 }

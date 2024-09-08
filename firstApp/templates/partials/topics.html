@@ -1,5 +1,5 @@
 Select Topic:
-<select class="custom-select mb-4" name="topicSelect" id = "topicSelect">
+<select name="topicSelect" id = "topicSelect">
     <option value="" selected>Unselected</option>
     {% for topic in topics %}
         <option value="{{topic.pk}}">{{ topic.name }}</option>

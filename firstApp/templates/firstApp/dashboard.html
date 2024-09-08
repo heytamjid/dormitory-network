@@ -3,39 +3,61 @@
 
 {% block body %}
 
-<h3> Hello {{username}}, you are logged in! </h3>
-<a class="font-medium text-blue-600 dark:text-blue-500 hover:underline" href="{% url 'logout' %}">Logout</a>
-
-<br></br>
-
-{% comment %} {% include "partials/timerbox.html" %} {% endcomment %}
-
-Select Course:
-<select id ='courseSelect' class="custom-select mb-4" name="courseSelect"
-    hx-get="{% url 'getTopics' %}"
-    hx-trigger="change"
-    hx-target="#topic-dropdown-div">
-
-    <option value="" selected>Unselected</option>
-    {% for course in courses %}
-        <option value="{{course.pk}}">{{ course.name }}</option>
-    {% endfor %}
-</select> 
+<header class="header c">
+    <div><a href="{% url 'dashboard'%}"><h1 class="site-name c">{{username}}'s Dashboard</h1></a></div>
+    <nav>
+        <ul class="nav-links c">
+            <li><a href="{% url 'report' %}">Report</a></li>
+            <li><a href="{% url 'addCourse'%}">Add Course</a></li>
+            <li><a href="{% url 'addTopic'%}">Add Topic</a></li>
+            <li><a href="{% url 'logout' %}">Log Out</a></li>
+        </ul>
+    </nav>
+</header>
 
 
-<div id="topic-dropdown-div">
-    {% include 'partials/topics.html' %} 
-    {% comment %}  template tag used in Django templates to include the content of another template file within the current template.
-    also the context sent in this page is also avaiable in the included partial page. {% endcomment %}
-</div> 
+
+<div class=" c px-[6em]">
 
 
- 
-<input id="sessionDescription" placeholder="Session Description" type="text">
 
-<br><br>
 
-<button hx-trigger="click" type="submit" id="startTimerButton" hx-get="/startTimerClicked/" hx-target="#startTimerButton" hx-swap="outerHTML" class="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm plotly.express-5 py-2.5 text-center me-2 mb-2">Start Tracking</button>
+<div class="row-container">
+    <div class="item course-select">
+      <label for="courseSelect">Select Course:</label>
+      <select id="courseSelect" name="courseSelect"
+          hx-get="{% url 'getTopics' %}"
+          hx-trigger="change"
+          hx-target="#topic-dropdown-div">
+          <option value="" selected>Unselected</option>
+          {% for course in courses %}
+              <option value="{{ course.pk }}">{{ course.name }}</option>
+          {% endfor %}
+      </select>
+    </div>
+  
+    <div class="item topic-select" id="topic-dropdown-div">
+      {% include 'partials/topics.html' %} 
+    </div>
+  
+    <div class="item description-input">
+        <label for="sessionDescription">Session Description:</label>
+        <input id="sessionDescription" placeholder="What are you working on?" type="text" class="form-control">
+    </div>
+  
+    <div class="item start-button mt-5">
+      <button hx-trigger="click" type="submit" id="startTimerButton" hx-get="/startTimerClicked/" hx-target="#startTimerButton" hx-swap="outerHTML" 
+        class="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+        Start Tracking
+      </button>
+    </div>
+  </div>
+
+
+
+
+
+
 
 
 
@@ -46,9 +68,6 @@ Select Course:
     {% comment %} so basically hx-trigger specifies when something (the item itself OR FROM A DIFFERENT PART OTHER THAN WHERE IT IS WRITTEN. FOR THE 2ND CASE, YOU NEED FROM:CSS SELECTOR ) is changed/ triggered/ happened/ listened (as defined in hx-trigger),
     htmx will issue a request as defined and the response will be processed at wherever hx-select points to   {% endcomment %}
     {% comment %} how renderEntryzz was triggered? check out stop_timer view {% endcomment %}
-    <span>
-        Hello
-    </span>
 </div>
 
 {% comment %} <script> 
@@ -61,5 +80,7 @@ Select Course:
       });
 </script>
 <script>console.log("HEY")</script> {% endcomment %}
+
+</div>
 
 {% endblock %}
