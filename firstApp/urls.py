@@ -32,6 +32,15 @@ urlpatterns = [
     path('hello-webpack/', views.helloWebpack, name='hello-webpack'),
     
     
+    
+    path('api/courses/', views.CourseListView.as_view(), name='course-list'),
+    path('api/topics/', views.TopicListView.as_view(), name='topic-list'),
+    path('api/topics/<int:course_id>/', views.TopicListView.as_view(), name='course-topics'),
+    path('api/tracked-times/', views.TrackedTimeDBCreateView.as_view(), name='tracked-time-create'),
+    
+    #path('api-token-auth/', views.obtain_auth_token),
+    
+    
 ]  + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
  
  

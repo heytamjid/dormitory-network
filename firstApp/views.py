@@ -15,6 +15,8 @@ import plotly.graph_objects
 from django.db.models import F, Sum, DurationField, ExpressionWrapper
 from django.db.models.functions import TruncDate
 import json
+from rest_framework import generics, permissions
+from .serializers import *
 
 def helloWebpack (request):
     context = {
@@ -619,3 +621,40 @@ def get_bar_chart_data(request):
     response = HttpResponse(chart_html)
 
     return response
+
+
+# VIEWS AFTER REACT INTEGRATION        
+        
+class CourseListView(generics.ListAPIView):
+    serializer_class = CourseSerializer
+    permission_classes = [permissions.IsAuthenticated] #[permissions.AllowAny]
+
+    def get_queryset(self):
+        return Course.objects.filter(user=self.request.user)
+    
+class TopicListView(generics.ListAPIView):
+    serializer_class = TopicSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        course_id = self.kwargs.get('course_id')
+        queryset = Topic.objects.filter(user=self.request.user)
+        
+        if course_id:
+            queryset = queryset.filter(course__id=course_id)
+        return queryset
+    
+
+class TrackedTimeDBCreateView(generics.CreateAPIView):
+    serializer_class = TrackedTimeDBSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        start_time = serializer.validated_data['startTime']
+        end_time = serializer.validated_data['endTime']
+        duration = end_time - start_time
+        
+        serializer.save(
+            user=self.request.user,
+            duration=duration
+        )

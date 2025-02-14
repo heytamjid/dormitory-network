@@ -1,10 +1,10 @@
 const path = require('path');
 
 module.exports = {
-  entry: './assets/index.jsx',  // path to our input file
+  entry: './assets/index.jsx',
   output: {
-    filename: 'index-bundle.jsx',  // output bundle file name
-    path: path.resolve(__dirname, './static'),  // path to our Django static directory
+    filename: 'index-bundle.jsx',
+    path: path.resolve(__dirname, './static'),
   },
   module: {
     rules: [
@@ -14,9 +14,16 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env', '@babel/preset-react']
+            presets: [
+              '@babel/preset-env',
+              ['@babel/preset-react', { runtime: 'automatic' }]
+            ]
           }
         }
+      },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader'],
       }
     ]
   },

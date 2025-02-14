@@ -1,17 +1,9 @@
-import React from 'react'; //importnat
+import Timer from './components/Timer';
 
-const title = JSON.parse(document.getElementById('title').textContent);
-const type = JSON.parse(document.getElementById('type').textContent);
-console.log(title)
-console.log(type)
-
-
-const App = () => {
+function App() { //this calssName app-container is not defined in css file yet, but will be used later to rightly position and style the Timercomponent. 
   return (
-    <div>
-      <h1>Hello, world!</h1>
-      <p>Welcome to my React app.</p>
-      <p>{title} and {type}</p>
+    <div className="app-container"> 
+      <Timer />
     </div>
   );
 }

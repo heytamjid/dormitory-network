@@ -40,13 +40,21 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'firstApp',
     'debug_toolbar',
-    'rest_framework',  
+    'rest_framework',
+    'rest_framework.authtoken',
+    'django_filters',   
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'], #kebol eita chilo
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        #'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
 }
-
 
 
 ### this part is added to disable djdt###
