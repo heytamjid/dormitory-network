@@ -152,10 +152,10 @@ USE_TZ = True
 
 #managing static files: https://www.youtube.com/watch?v=Tt3mgy2ECug
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
+STATICFILES_DIRS = [ #for development
     os.path.join(BASE_DIR, 'static'),
 ]
-STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
+STATIC_ROOT = os.path.join(BASE_DIR, 'django_bundle') #for deployment
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
