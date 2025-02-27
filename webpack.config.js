@@ -6,8 +6,13 @@ module.exports = {
     filename: 'index-bundle.jsx',
     path: path.resolve(__dirname, './static'),
   },
+  
   module: {
     rules: [
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader', "postcss-loader"],
+      },
       {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
@@ -21,10 +26,7 @@ module.exports = {
           }
         }
       },
-      {
-        test: /\.css$/,
-        use: ['style-loader', 'css-loader'],
-      }
+
     ]
   },
   resolve: {

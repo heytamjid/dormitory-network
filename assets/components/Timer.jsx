@@ -45,7 +45,7 @@ const Timer = () => {
 
 
 
-  
+
   const handleStartStop = () => {
     if (!isRunning) {
       setStartTime(Date.now());
