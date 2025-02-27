@@ -16,6 +16,7 @@ class myUserDB (AbstractUser):
 
 
 class Course(models.Model):
+    #If you don't explicitly define a primary key field in your Django model, Django automatically adds an id field. This id field is typically an auto-incrementing integer field, serving as the primary key for your model's database table.
     name = models.CharField(max_length=100)
     isArchived = models.BooleanField(default = False)
     user = models.ForeignKey(myUserDB, on_delete=models.CASCADE, related_name = 'CourseUnderUser')

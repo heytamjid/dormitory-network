@@ -31,12 +31,12 @@ urlpatterns = [
     path('get-chart-data/', views.get_bar_chart_data, name='get_bar_chart_data'),
     path('hello-webpack/', views.helloWebpack, name='hello-webpack'),
     
-    
+    #after the integration 
     
     path('api/courses/', views.CourseListView.as_view(), name='course-list'),
     path('api/topics/', views.TopicListView.as_view(), name='topic-list'),
-    path('api/topics/<int:course_id>/', views.TopicListView.as_view(), name='course-topics'),
-    path('api/tracked-times/', views.TrackedTimeDBCreateView.as_view(), name='tracked-time-create'),
+    path('api/courses/<int:course_id>/topics/', views.TopicListView.as_view(), name='course-topics'),
+    path('api/create/tracked-time/', views.TrackedTimeDBCreateView.as_view(), name='tracked-time-create'),
     
     #path('api-token-auth/', views.obtain_auth_token),
     

@@ -627,7 +627,7 @@ def get_bar_chart_data(request):
         
 class CourseListView(generics.ListAPIView):
     serializer_class = CourseSerializer
-    permission_classes = [permissions.IsAuthenticated] #[permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated] # alternatively, [permissions.AllowAny]
 
     def get_queryset(self):
         return Course.objects.filter(user=self.request.user)
@@ -637,24 +637,25 @@ class TopicListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        course_id = self.kwargs.get('course_id')
         queryset = Topic.objects.filter(user=self.request.user)
         
+        course_id = self.kwargs.get('course_id') #kwargs is a dictionary containing the URL keyword argument. #course_id is the keyword argument passed in the URL pattern. #kwargs.get() is used to get the value of the keyword argument from the URL.    
         if course_id:
-            queryset = queryset.filter(course__id=course_id)
+            queryset = queryset.filter(course__id=course_id) #course__id is the field lookup syntax for a foreign key field in Django. #course is the field name in the Topic model that is a foreign key to the Course model. #id is the field name in the Course model.
+        #print(queryset)
         return queryset
     
 
 class TrackedTimeDBCreateView(generics.CreateAPIView):
-    serializer_class = TrackedTimeDBSerializer
+    serializer_class = TrackedTimeDBSerializer #serializer class used to deserialize the data after receiving from the frontend.
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
-        start_time = serializer.validated_data['startTime']
+        start_time = serializer.validated_data['startTime'] #serializer.validated_data is a dictionary containing the validated data from the serializer.
         end_time = serializer.validated_data['endTime']
         duration = end_time - start_time
         
-        serializer.save(
+        serializer.save( # serializer.save() is used to save the data to the database. it creates a new TrackedTimeDB instance with the validated data AS WELL AS the additional data provided as parameters to the save() method.
             user=self.request.user,
             duration=duration
         )
