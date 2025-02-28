@@ -14,14 +14,16 @@ module.exports = {
         use: ['style-loader', 'css-loader', "postcss-loader"],
       },
       {
-        test: /\.(js|jsx)$/,
+        test: /\.(js|jsx|ts|tsx)$/,
         exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
           options: {
             presets: [
               '@babel/preset-env',
-              ['@babel/preset-react', { runtime: 'automatic' }]
+              ['@babel/preset-react', { runtime: 'automatic' }],
+              '@babel/preset-typescript'
+
             ]
           }
         }
@@ -30,6 +32,6 @@ module.exports = {
     ]
   },
   resolve: {
-    extensions: ['.js', '.jsx']
+    extensions: ['.js', '.jsx', '.ts', '.tsx']
   }
 };

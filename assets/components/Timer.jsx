@@ -2,6 +2,19 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './timer.css';
 
+import { Button } from './../../components/ui/button.tsx'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from './../../components/ui/select.tsx'
+
+
+
 const Timer = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [startTime, setStartTime] = useState(null);
@@ -43,6 +56,23 @@ const Timer = () => {
     setSelectedTopic('');
   }, [selectedCourse]);
 
+useEffect(() => {
+  // Save the original method
+  const originalScrollIntoView = Element.prototype.scrollIntoView;
+  // Override scrollIntoView to ignore smooth scrolling
+  Element.prototype.scrollIntoView = function (options) {
+    if (options && options.behavior === 'smooth') {
+      // Prevent smooth scrolling (which causes the jump)
+      return;
+    }
+    return originalScrollIntoView.call(this, options);
+  };
+
+  return () => {
+    // Restore the original method on cleanup
+    Element.prototype.scrollIntoView = originalScrollIntoView;
+  };
+}, []);
 
 
 
@@ -107,38 +137,98 @@ const Timer = () => {
     <div className="timer-container">
       <div className="timer-controls">
         <p>in Timer.jsx</p>
-        <select
-          value={selectedCourse} 
-          onChange={(e) => setSelectedCourse(e.target.value)}
-          disabled={isRunning}
-        >
-          <option value="">Select Course</option>
-          {courses.map((course) => (
-            <option key={course.id} value={course.id}>
-              {course.name}
-            </option> 
-          ))}
-        </select>
 
-        <select
-          value={selectedTopic}
-          onChange={(e) => setSelectedTopic(e.target.value)}
-          disabled={isRunning}
-        >
-          <option value="">Select Topic</option>
-          {topics.map((topic) => ( //. In JSX, it's perfectly valid to return an array of elements, and React will render each element in that array sequentially
-            <option key={topic.id} value={topic.id}>
-              {topic.name}
-            </option>
-          ))}
-        </select>
 
-        <button 
+{/* Courses Select */}
+<Select value={selectedCourse} onValueChange={setSelectedCourse}>
+  <SelectTrigger className="w-[180px]" disabled={isRunning}>
+    <SelectValue placeholder="Select Course" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectGroup>
+      <SelectLabel>Courses</SelectLabel>
+      {courses.map((course) => (
+        <SelectItem key={course.id} value={course.id}>
+          {course.name}
+        </SelectItem>
+      ))}
+    </SelectGroup>
+  </SelectContent>
+</Select>
+
+{/* Topics Select */}
+<Select value={selectedTopic} onValueChange={setSelectedTopic}>
+  <SelectTrigger className="w-[180px]" disabled={isRunning}>
+    <SelectValue placeholder="Select Topic" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectGroup>
+      <SelectLabel>Topics</SelectLabel>
+      {topics.map((topic) => (
+        <SelectItem key={topic.id} value={topic.id}>
+          {topic.name}
+        </SelectItem>
+      ))}
+    </SelectGroup>
+  </SelectContent>
+</Select>
+
+{/* deepseek version that even moves the component to top <div className="timer-controls">
+  <Select 
+    value={selectedCourse} 
+    onValueChange={setSelectedCourse}
+    disabled={isRunning}
+  >
+    <SelectTrigger className="w-[180px]">
+      <SelectValue placeholder="Select a course" />
+    </SelectTrigger>
+    <SelectContent>
+      <SelectGroup>
+        <SelectLabel>Courses</SelectLabel>
+        {courses.map((course) => (
+          <SelectItem key={course.id} value={course.id}>
+            {course.name}
+          </SelectItem>
+        ))}
+      </SelectGroup>
+    </SelectContent>
+  </Select>
+
+  <Select
+    value={selectedTopic}
+    onValueChange={setSelectedTopic}
+    disabled={isRunning}
+  >
+    <SelectTrigger className="w-[180px]">
+      <SelectValue placeholder="Select a topic" />
+    </SelectTrigger>
+    <SelectContent>
+      <SelectGroup>
+        <SelectLabel>Topics</SelectLabel>
+        {topics.map((topic) => (
+          <SelectItem key={topic.id} value={topic.id}>
+            {topic.name}
+          </SelectItem>
+        ))}
+      </SelectGroup>
+    </SelectContent>
+  </Select>
+
+  <Button 
+    onClick={handleStartStop}
+    disabled={!selectedCourse || !selectedTopic}
+  >
+    {isRunning ? 'Stop Timer' : 'Start Timer'}
+  </Button>
+</div>*/}
+
+
+        <Button 
           onClick={handleStartStop}
           disabled={!selectedCourse || !selectedTopic}
         >
           {isRunning ? 'Stop Timer' : 'Start Timer'}
-        </button>
+        </Button>
       </div>
       
       <div className="timer-display">

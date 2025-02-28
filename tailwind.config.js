@@ -3,7 +3,7 @@
 
 module.exports = {
   content: [
-    "./assets/**/*.{js,jsx,ts,tsx}",
+    "./assets/**/*","./components/**/*",
   ],
   theme: {
     extend: {
@@ -39,6 +39,7 @@ module.exports = {
       },
     },
   },
+
   plugins: [
     require("tailwindcss-animate") // or any other plugins you want to use
   ],
