@@ -1,5 +1,5 @@
-.timer-container {
-    position: absolute;
+/* .timer-container {
+    position: relative;
     left: 40%;
     top: 50%;
     transform: translateY(-50%);
@@ -10,7 +10,7 @@
   }
   
   .timer-controls {
-    display: flex;
+    display: relative;
     flex-direction: column;
     gap: 10px;
     margin-bottom: 20px;
@@ -30,4 +30,4 @@
   button:disabled {
     background-color: #ccc;
     cursor: not-allowed;
-  }
+  } */

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import './timer.css';
 
 import { Button } from './../../components/ui/button.tsx'
 import {
@@ -56,23 +55,23 @@ const Timer = () => {
     setSelectedTopic('');
   }, [selectedCourse]);
 
-useEffect(() => {
-  // Save the original method
-  const originalScrollIntoView = Element.prototype.scrollIntoView;
-  // Override scrollIntoView to ignore smooth scrolling
-  Element.prototype.scrollIntoView = function (options) {
-    if (options && options.behavior === 'smooth') {
-      // Prevent smooth scrolling (which causes the jump)
-      return;
-    }
-    return originalScrollIntoView.call(this, options);
-  };
+  useEffect(() => {
+    // Save the original method
+    const originalScrollIntoView = Element.prototype.scrollIntoView;
+    // Override scrollIntoView to ignore smooth scrolling
+    Element.prototype.scrollIntoView = function (options) {
+      if (options && options.behavior === 'smooth') {
+        // Prevent smooth scrolling (which causes the jump)
+        return;
+      }
+      return originalScrollIntoView.call(this, options);
+    };
 
-  return () => {
-    // Restore the original method on cleanup
-    Element.prototype.scrollIntoView = originalScrollIntoView;
-  };
-}, []);
+    return () => {
+      // Restore the original method on cleanup
+      Element.prototype.scrollIntoView = originalScrollIntoView;
+    };
+  }, []);
 
 
 
@@ -81,7 +80,7 @@ useEffect(() => {
       setStartTime(Date.now());
       setCurrentTime(Date.now());
       setIsRunning(!isRunning);
-    } 
+    }
     else {
       const endTime = Date.now();
       const csrfToken = document.cookie
@@ -102,25 +101,25 @@ useEffect(() => {
         },
         withCredentials: true
       })
-      .then(() => {
-        console.log('Time tracked successfully');
-        setSelectedCourse(selectedCourse);
-        setSelectedTopic(selectedTopic);
-      })
-      .catch(error => {
-        console.error('Error tracking time:', error);
-      })
-      .finally(() => { 
-        setStartTime(null);
-        setCurrentTime(null);
-        setIsRunning(!isRunning);
-      }); //.then -> successful response, .catch -> error response, .finally -> always runs
+        .then(() => {
+          console.log('Time tracked successfully');
+          setSelectedCourse(selectedCourse);
+          setSelectedTopic(selectedTopic);
+        })
+        .catch(error => {
+          console.error('Error tracking time:', error);
+        })
+        .finally(() => {
+          setStartTime(null);
+          setCurrentTime(null);
+          setIsRunning(!isRunning);
+        }); //.then -> successful response, .catch -> error response, .finally -> always runs
     }
   };
 
   const formatTime = () => {
     if (!startTime || !currentTime) return '00:00:00';
-    
+
     const seconds = Math.floor((currentTime - startTime) / 1000);
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -134,103 +133,53 @@ useEffect(() => {
   };
 
   return (
-    <div className="timer-container">
+    <div className="timer-container ">
       <div className="timer-controls">
         <p>in Timer.jsx</p>
 
 
-{/* Courses Select */}
-<Select value={selectedCourse} onValueChange={setSelectedCourse}>
-  <SelectTrigger className="w-[180px]" disabled={isRunning}>
-    <SelectValue placeholder="Select Course" />
-  </SelectTrigger>
-  <SelectContent>
-    <SelectGroup>
-      <SelectLabel>Courses</SelectLabel>
-      {courses.map((course) => (
-        <SelectItem key={course.id} value={course.id}>
-          {course.name}
-        </SelectItem>
-      ))}
-    </SelectGroup>
-  </SelectContent>
-</Select>
+        {/* Courses Select */}
+        <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+          <SelectTrigger className="w-[180px]" disabled={isRunning}>
+            <SelectValue placeholder="Select Course" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Courses</SelectLabel>
+              {courses.map((course) => (
+                <SelectItem key={course.id} value={course.id}>
+                  {course.name}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
 
-{/* Topics Select */}
-<Select value={selectedTopic} onValueChange={setSelectedTopic}>
-  <SelectTrigger className="w-[180px]" disabled={isRunning}>
-    <SelectValue placeholder="Select Topic" />
-  </SelectTrigger>
-  <SelectContent>
-    <SelectGroup>
-      <SelectLabel>Topics</SelectLabel>
-      {topics.map((topic) => (
-        <SelectItem key={topic.id} value={topic.id}>
-          {topic.name}
-        </SelectItem>
-      ))}
-    </SelectGroup>
-  </SelectContent>
-</Select>
+        {/* Topics Select */}
+        <Select value={selectedTopic} onValueChange={setSelectedTopic}>
+          <SelectTrigger className="w-[180px]" disabled={isRunning}>
+            <SelectValue placeholder="Select Topic" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Topics</SelectLabel>
+              {topics.map((topic) => (
+                <SelectItem key={topic.id} value={topic.id}>
+                  {topic.name}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
 
-{/* deepseek version that even moves the component to top <div className="timer-controls">
-  <Select 
-    value={selectedCourse} 
-    onValueChange={setSelectedCourse}
-    disabled={isRunning}
-  >
-    <SelectTrigger className="w-[180px]">
-      <SelectValue placeholder="Select a course" />
-    </SelectTrigger>
-    <SelectContent>
-      <SelectGroup>
-        <SelectLabel>Courses</SelectLabel>
-        {courses.map((course) => (
-          <SelectItem key={course.id} value={course.id}>
-            {course.name}
-          </SelectItem>
-        ))}
-      </SelectGroup>
-    </SelectContent>
-  </Select>
-
-  <Select
-    value={selectedTopic}
-    onValueChange={setSelectedTopic}
-    disabled={isRunning}
-  >
-    <SelectTrigger className="w-[180px]">
-      <SelectValue placeholder="Select a topic" />
-    </SelectTrigger>
-    <SelectContent>
-      <SelectGroup>
-        <SelectLabel>Topics</SelectLabel>
-        {topics.map((topic) => (
-          <SelectItem key={topic.id} value={topic.id}>
-            {topic.name}
-          </SelectItem>
-        ))}
-      </SelectGroup>
-    </SelectContent>
-  </Select>
-
-  <Button 
-    onClick={handleStartStop}
-    disabled={!selectedCourse || !selectedTopic}
-  >
-    {isRunning ? 'Stop Timer' : 'Start Timer'}
-  </Button>
-</div>*/}
-
-
-        <Button 
+        <Button
           onClick={handleStartStop}
           disabled={!selectedCourse || !selectedTopic}
         >
           {isRunning ? 'Stop Timer' : 'Start Timer'}
         </Button>
       </div>
-      
+
       <div className="timer-display">
         {formatTime()}
       </div>
