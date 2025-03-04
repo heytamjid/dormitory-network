@@ -85,7 +85,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-@layer base {
+/* @layer base {
   * {
     
   }
@@ -93,5 +93,5 @@
     
   }
 }
-
+ */
 

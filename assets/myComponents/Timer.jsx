@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-import { Button } from './../../components/ui/button.tsx'
+import { Button } from 'components/button.tsx'
 import {
   Select,
   SelectContent,
@@ -10,7 +10,7 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from './../../components/ui/select.tsx'
+} from 'components/select.tsx'
 
 
 

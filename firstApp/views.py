@@ -659,3 +659,4 @@ class TrackedTimeDBCreateView(generics.CreateAPIView):
             user=self.request.user,
             duration=duration
         )
+

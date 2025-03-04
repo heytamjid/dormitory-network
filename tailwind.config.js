@@ -3,7 +3,8 @@
 
 module.exports = {
   content: [
-    "./assets/**/*","./components/**/*",
+    "./**/*",
+    "!./node_modules/**/*"
   ],
   theme: {
     extend: {
