@@ -29,10 +29,10 @@ module.exports = {
         shadow: 'var(--shadow)'
       },
       translate: {
-        boxShadowX: '6px',
-        boxShadowY: '6px',
-        reverseBoxShadowX: '-6px',
-        reverseBoxShadowY: '-6px',
+        boxShadowX: '3px',
+        boxShadowY: '3px',
+        reverseBoxShadowX: '-3px',
+        reverseBoxShadowY: '-3px',
       },
       fontWeight: {
         base: '500',
