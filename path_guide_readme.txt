@@ -13,9 +13,11 @@ django creates its own for-deployment statcic files at ./django_bunnlde taking t
 ===========================================
 
 alias are set up at
-1. webpack.config.js [must for bundling to use]
-2. tsconfig.json [without here, import statements are marked red in ts files in VS code]
-3. components.json [when executing command on shadcn CLI, this tells shadcn where to install the packages]
+1. webpack.config.js [used while bundling]
+2. tsconfig.json [without here, import statements in ts files will be marked red in VS code]
+3. components.json [when executing command on shadcn CLI, this tells shadcn where to install the packages.]
+
+while declaring alias in any config files, don't use alias in the RHS. 
 
 
 =============================================

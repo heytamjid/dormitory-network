@@ -4,14 +4,17 @@
       "module": "ESNext",
       "lib": ["DOM", "DOM.Iterable", "ESNext"],
       "baseUrl": ".",
+
       "paths": {
-        "@/*": ["./*"],
+        "@": [""],
+        "shadcn": ["assets/shadcn"],
         "utils": ["assets/shadcn/lib/utils"],
         "components": ["assets/shadcn/components"],
-        "ui": ["assets/shadcn/components/ui"],
+        "ui": ["assets/shadcn/ui"],
         "lib": ["assets/shadcn/lib"],
         "hooks": ["assets/shadcn/hooks"],
       },
+
       "jsx": "react-jsx",
       "moduleResolution": "node",
       "strict": true,
