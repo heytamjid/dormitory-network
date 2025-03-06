@@ -39,7 +39,7 @@ module.exports = {
       // Optionally, if you want to support imports using "@/components/..."
       //'@/components': path.resolve(__dirname, 'assets/shadcn/components'),
       utils: path.resolve(__dirname, 'assets/shadcn/lib/utils'),
-      // ui: path.resolve(__dirname, 'assets/shadcn/ui'),
+      ui: path.resolve(__dirname, 'assets/shadcn/ui'),
       // lib: path.resolve(__dirname, 'assets/shadcn/lib'),
       // hooks: path.resolve(__dirname, 'assets/shadcn/hooks'),
     },

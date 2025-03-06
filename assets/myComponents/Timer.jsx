@@ -11,6 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from 'shadcn/ui/select.tsx'
+import { Input } from 'shadcn/ui/input'
+
 
 
 
@@ -22,6 +24,7 @@ const Timer = () => {
   const [selectedTopic, setSelectedTopic] = useState('');
   const [courses, setCourses] = useState([]);
   const [topics, setTopics] = useState([]);
+  const [description, setDescription] = useState('');
 
 
 
@@ -55,23 +58,6 @@ const Timer = () => {
     setSelectedTopic('');
   }, [selectedCourse]);
 
-  useEffect(() => {
-    // Save the original method
-    const originalScrollIntoView = Element.prototype.scrollIntoView;
-    // Override scrollIntoView to ignore smooth scrolling
-    Element.prototype.scrollIntoView = function (options) {
-      if (options && options.behavior === 'smooth') {
-        // Prevent smooth scrolling (which causes the jump)
-        return;
-      }
-      return originalScrollIntoView.call(this, options);
-    };
-
-    return () => {
-      // Restore the original method on cleanup
-      Element.prototype.scrollIntoView = originalScrollIntoView;
-    };
-  }, []);
 
 
 
@@ -92,8 +78,9 @@ const Timer = () => {
       axios.post('/api/create/tracked-time/', {
         startTime: new Date(startTime).toISOString(), //This creates a new Date object in JavaScript. The Date constructor takes the endTime timestamp as an argument, converting it into a date and time representation that JavaScript can work with. .toISOString(): This method is called on the Date object. It converts the date and time represented by the Date object into an ISO 8601 formatted string. The resulting string will look something like "YYYY-MM-DDTHH:mm:ss.sssZ" (e.g., "2023-10-27T14:30:00.000Z").
         endTime: new Date(endTime).toISOString(),
-        course: selectedCourse,
-        topic: selectedTopic
+        course: selectedCourse || null, // in JS, an empty string ('', "", ) is considered falsy.
+        topic: selectedTopic || null, // in JS, || returns the first "truthy" value it encounters, or the last "falsy" value if no truthy value is found
+        session: description || null // in C, C's || operator is strictly a logical operator. It evaluates expressions as boolean conditions and returns a boolean result. C does not have truthy/falsy values either
       }, {
         headers: {
           'Content-Type': 'application/json',
@@ -103,8 +90,6 @@ const Timer = () => {
       })
         .then(() => {
           console.log('Time tracked successfully');
-          setSelectedCourse(selectedCourse);
-          setSelectedTopic(selectedTopic);
         })
         .catch(error => {
           console.error('Error tracking time:', error);
@@ -133,54 +118,63 @@ const Timer = () => {
   };
 
   return (
-    <div className="timer-container ">
+    <div className=''>
       <div className="timer-controls">
-        <p>in Timer.jsx</p>
-
 
         {/* Courses Select */}
-        <Select value={selectedCourse} onValueChange={setSelectedCourse}>
-          <SelectTrigger className="w-[180px]" disabled={isRunning}>
-            <SelectValue placeholder="Select Course" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Courses</SelectLabel>
-              {courses.map((course) => (
-                <SelectItem key={course.id} value={course.id}>
-                  {course.name}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+        <div className='mx-4 my-2'>
+          <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select Course" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Courses</SelectLabel>
+                {courses.map((course) => (
+                  <SelectItem key={course.id} value={course.id}>
+                    {course.name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
 
         {/* Topics Select */}
-        <Select value={selectedTopic} onValueChange={setSelectedTopic}>
-          <SelectTrigger className="w-[180px]" disabled={isRunning}>
-            <SelectValue placeholder="Select Topic" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Topics</SelectLabel>
-              {topics.map((topic) => (
-                <SelectItem key={topic.id} value={topic.id}>
-                  {topic.name}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+        <div className='mx-4 my-2'>
+          <Select value={selectedTopic} onValueChange={setSelectedTopic}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select Topic" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Topics</SelectLabel>
+                {topics.map((topic) => (
+                  <SelectItem key={topic.id} value={topic.id}>
+                    {topic.name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <Input 
+        className="w-[180px] mx-4 my-2" 
+        type="text" 
+        placeholder="Task" 
+        value={description}
+        onChange={(e) => setDescription(e.target.value)} />
 
         <Button
+          className  = "mx-4 my-0" 
           onClick={handleStartStop}
-          disabled={!selectedCourse || !selectedTopic}
         >
           {isRunning ? 'Stop Timer' : 'Start Timer'}
         </Button>
       </div>
 
-      <div className="timer-display">
+      <div className="timer-display mx-4 my-4 border-2 border-black shadow-[2px_2px_0_0_black] text-2xl font-bold font-mono tracking-widest text-center p-4">
         {formatTime()}
       </div>
     </div>

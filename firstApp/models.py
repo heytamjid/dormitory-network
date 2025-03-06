@@ -17,7 +17,7 @@ class myUserDB (AbstractUser):
 
 class Course(models.Model):
     #If you don't explicitly define a primary key field in your Django model, Django automatically adds an id field. This id field is typically an auto-incrementing integer field, serving as the primary key for your model's database table.
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=128)
     isArchived = models.BooleanField(default = False)
     user = models.ForeignKey(myUserDB, on_delete=models.CASCADE, related_name = 'CourseUnderUser')
     
@@ -25,7 +25,7 @@ class Course(models.Model):
         return self.name
 
 class Topic(models.Model):
-    name = models.CharField(max_length=120)
+    name = models.CharField(max_length=128)
     course = models.ForeignKey(Course, on_delete=models.SET_NULL, null =  True, related_name = 'TopicUnderCourse')
     user = models.ForeignKey(myUserDB, on_delete=models.CASCADE, related_name = 'TopicUnderUser')
 
@@ -42,7 +42,7 @@ class TrackedTimeDB (models.Model):
     duration = models.DurationField()
     course = models.ForeignKey(Course, on_delete=models.SET_NULL, null = True, default = None, related_name = 'trackedTimeUnderCourse' )
     topic = models.ForeignKey(Topic, on_delete=models.SET_NULL, null = True, default = None, related_name = 'trackedTimeUnderTopic')
-    session = models.CharField(max_length=900, null = True, default = None)
+    session = models.CharField(max_length=128, null = True, default = None)
     
     def __str__(self):
         return f"Session for {self.topic.name} ({self.start_time} to {self.end_time})"
