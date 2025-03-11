@@ -118,7 +118,7 @@ const Timer = () => {
   };
 
   return (
-    <div className=''>
+    <div>
       <div className="timer-controls">
 
         {/* Courses Select */}
