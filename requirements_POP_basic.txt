@@ -1,0 +1,5 @@
+python 3.10.12
+pop 22.0.2 from python 3.10
+nvm 0.40.2
+node v20.14.0
+npm 10.7.0

@@ -4,7 +4,8 @@
 module.exports = {
   content: [
     "./**/*",
-    "!./node_modules/**/*"
+    "!./node_modules/**/*",
+    "!./env/**/*"
   ],
   theme: {
     extend: {

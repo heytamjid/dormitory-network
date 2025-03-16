@@ -1,6 +1,0 @@
-django-timezone-field
-django-debug-toolbar
-plotly
-dash
-pandas
-django-filter
