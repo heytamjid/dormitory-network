@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-
 import { Button } from 'shadcn/ui/button.tsx';
 import {
   Select,
@@ -10,11 +9,8 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from 'shadcn/ui/select.tsx'
-import { Input } from 'shadcn/ui/input'
-
-
-
+} from 'shadcn/ui/select.tsx';
+import { Input } from 'shadcn/ui/input';
 
 const Timer = () => {
   const [isRunning, setIsRunning] = useState(false);
@@ -25,32 +21,65 @@ const Timer = () => {
   const [courses, setCourses] = useState([]);
   const [topics, setTopics] = useState([]);
   const [description, setDescription] = useState('');
+  const [timerId, setTimerId] = useState(null);
+  const [pendingTopic, setPendingTopic] = useState(null);
 
+  // Create a ref to store the single WebSocket instance
+  const socketRef = useRef(null);
 
+  // Establish WebSocket connection only once on component mount
+  useEffect(() => {
+    socketRef.current = new WebSocket('ws://' + window.location.host + '/ws/active-now/');
 
+    socketRef.current.onopen = () => {
+      console.log('WebSocket connection established');
+    };
+
+    socketRef.current.onmessage = (event) => {
+      console.log('Received message:', event.data);
+    };
+
+    socketRef.current.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
+    socketRef.current.onclose = () => {
+      console.log('WebSocket connection closed');
+    };
+
+    // Clean up when component unmounts
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.close();
+      }
+    };
+  }, []);
+
+  // Timer interval
   useEffect(() => {
     let interval;
     if (isRunning) {
-      interval = setInterval(() => { //setInterval(func, delay in ms) is a built-in JavaScript function that calls the function or evaluates an expression at specified intervals indefinitely unless clearInterval() is called
-        setCurrentTime(Date.now());
+      interval = setInterval(() => {
         setCurrentTime(Date.now());
       }, 1000);
     }
-    return () => clearInterval(interval); //https://telegra.ph/clearInterval-02-26
+    return () => clearInterval(interval);
   }, [isRunning]);
 
-  // Fetch courses with Axios
+  // Fetch courses
   useEffect(() => {
-    axios.get('/api/courses/', { withCredentials: true })  // Sending session cookie. for session based authentication backend.
-      .then(res => setCourses(res.data))  //.then() always takes a function as an argument. That function receives the resolved value of the previous Promise. //res for response. res, data are just variable names representing the resolved value of the previous . 
-      .catch(console.error);  // res.data will contain the response from the Django API converted into JSON (you dont need to call .json like fetch API), which can be a topic or an array of topics for the selected course. The structure of the data will depend on how you've set up your Django API
+    axios
+      .get('/api/courses/', { withCredentials: true })
+      .then((res) => setCourses(res.data))
+      .catch(console.error);
   }, []);
 
-  // Fetch topics with Axios
+  // Fetch topics when a course is selected
   useEffect(() => {
     if (selectedCourse) {
-      axios.get(`/api/courses/${selectedCourse}/topics/`, { withCredentials: true })
-        .then(res => setTopics(res.data)) // see here: https://telegra.ph/what-is-then-02-26
+      axios
+        .get(`/api/courses/${selectedCourse}/topics/`, { withCredentials: true })
+        .then((res) => setTopics(res.data))
         .catch(console.error);
     } else {
       setTopics([]);
@@ -58,47 +87,93 @@ const Timer = () => {
     setSelectedTopic('');
   }, [selectedCourse]);
 
+  // Check for active timer on mount
+  useEffect(() => {
+    const checkActiveTimer = async () => {
+      try {
+        const response = await axios.get('/api/get-active-timer/', { withCredentials: true });
+        const data = response.data;
+        if (data.id) {
+          setSelectedCourse(data.course || '');
+          setPendingTopic(data.topic || '');
+          setDescription(data.session || '');
+          setStartTime(new Date(data.startTime).getTime());
+          setCurrentTime(Date.now());
+          setIsRunning(true);
+          setTimerId(data.id);
+        }
+      } catch (error) {
+        console.log('No active timer or error fetching active timer');
+      }
+    };
+    checkActiveTimer();
+  }, []);
 
-
+  // Set selectedTopic when topics are available
+  useEffect(() => {
+    if (pendingTopic !== null && topics.length > 0) {
+      setSelectedTopic(pendingTopic);
+      setPendingTopic(null);
+    }
+  }, [topics, pendingTopic]);
 
   const handleStartStop = () => {
+    const csrfToken = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith('csrftoken='))
+      ?.split('=')[1];
+
     if (!isRunning) {
       setStartTime(Date.now());
       setCurrentTime(Date.now());
-      setIsRunning(!isRunning);
-    }
-    else {
-      const endTime = Date.now();
-      const csrfToken = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('csrftoken='))
-        ?.split('=')[1];
+      setIsRunning(true);
 
-      // Axios POST request
-      axios.post('/api/create/tracked-time/', {
-        startTime: new Date(startTime).toISOString(), //This creates a new Date object in JavaScript. The Date constructor takes the endTime timestamp as an argument, converting it into a date and time representation that JavaScript can work with. .toISOString(): This method is called on the Date object. It converts the date and time represented by the Date object into an ISO 8601 formatted string. The resulting string will look something like "YYYY-MM-DDTHH:mm:ss.sssZ" (e.g., "2023-10-27T14:30:00.000Z").
-        endTime: new Date(endTime).toISOString(),
-        course: selectedCourse || null, // in JS, an empty string ('', "", ) is considered falsy.
-        topic: selectedTopic || null, // in JS, || returns the first "truthy" value it encounters, or the last "falsy" value if no truthy value is found
-        session: description || null // in C, C's || operator is strictly a logical operator. It evaluates expressions as boolean conditions and returns a boolean result. C does not have truthy/falsy values either
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken
-        },
-        withCredentials: true
-      })
+      axios
+        .post(
+          '/api/start-timer/',
+          {
+            course: selectedCourse || null,
+            topic: selectedTopic || null,
+            session: description || null,
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrfToken,
+            },
+            withCredentials: true,
+          }
+        )
+        .then((response) => {
+          setTimerId(response.data.id);
+          if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+            socketRef.current.send(JSON.stringify({ action: 'start_timer' }));
+          }
+        })
+        .catch((error) => console.error('Error starting timer:', error));
+    } else {
+      axios
+        .post(
+          '/api/stop-timer/',
+          { id: timerId },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrfToken,
+            },
+            withCredentials: true,
+          }
+        )
         .then(() => {
-          console.log('Time tracked successfully');
-        })
-        .catch(error => {
-          console.error('Error tracking time:', error);
-        })
-        .finally(() => {
+          if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+            socketRef.current.send(JSON.stringify({ action: 'stop_timer' }));
+          }
           setStartTime(null);
           setCurrentTime(null);
-          setIsRunning(!isRunning);
-        }); //.then -> successful response, .catch -> error response, .finally -> always runs
+          setIsRunning(false);
+          setTimerId(null);
+        })
+        .catch((error) => console.error('Error stopping timer:', error));
     }
   };
 
@@ -120,11 +195,10 @@ const Timer = () => {
   return (
     <div>
       <div className="timer-controls">
-
         {/* Courses Select */}
-        <div className='mx-4 my-2'>
+        <div className="mx-4 my-2">
           <Select value={selectedCourse} onValueChange={setSelectedCourse}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger disabled={isRunning} className="w-[180px]">
               <SelectValue placeholder="Select Course" />
             </SelectTrigger>
             <SelectContent>
@@ -141,9 +215,9 @@ const Timer = () => {
         </div>
 
         {/* Topics Select */}
-        <div className='mx-4 my-2'>
+        <div className="mx-4 my-2">
           <Select value={selectedTopic} onValueChange={setSelectedTopic}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger disabled={isRunning} className="w-[180px]">
               <SelectValue placeholder="Select Topic" />
             </SelectTrigger>
             <SelectContent>
@@ -159,17 +233,16 @@ const Timer = () => {
           </Select>
         </div>
 
-        <Input 
-        className="w-[180px] mx-4 my-2" 
-        type="text" 
-        placeholder="Task" 
-        value={description}
-        onChange={(e) => setDescription(e.target.value)} />
+        <Input
+          className="w-[180px] mx-4 my-2"
+          type="text"
+          placeholder="Task"
+          value={description}
+          disabled={isRunning}
+          onChange={(e) => setDescription(e.target.value)}
+        />
 
-        <Button
-          className  = "mx-4 my-0" 
-          onClick={handleStartStop}
-        >
+        <Button className="mx-4 my-0" onClick={handleStartStop}>
           {isRunning ? 'Stop Timer' : 'Start Timer'}
         </Button>
       </div>

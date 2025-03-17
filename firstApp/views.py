@@ -17,7 +17,12 @@ from django.db.models.functions import TruncDate
 import json
 from rest_framework import generics, permissions
 from .serializers import *
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
+
+
+@login_required
 def helloWebpack (request):
     context = {
         'title' : 'no country for the old man',
@@ -150,7 +155,7 @@ def start_timer(request):
     # JSON could be string, number, object, array, true, false, null. But it can't be a function or evaluatable variable. To evaluate them use js as mentioned here https://htmx.org/attributes/hx-vals/ or use https://htmx.org/attributes/hx-vars/ that is dynamically computed.
 
 @login_required
-def stop_timer(request):
+def stop_timer_old(request):
     end_time = timezone.now().timestamp()
     start_time = request.session['start_time']
     duration = (end_time - start_time)
@@ -660,3 +665,48 @@ class TrackedTimeDBCreateView(generics.CreateAPIView):
             duration=duration
         )
 
+
+
+@api_view(['POST'])
+def start_timer(request):
+    user = request.user
+    start_time = timezone.now() 
+    course_id = request.data.get('course')
+    topic_id = request.data.get('topic')
+    session = request.data.get('session')
+
+    tracked_time = TrackedTimeDB.objects.create(
+        user=user,
+        startTime=start_time,
+        course_id=course_id,
+        topic_id=topic_id,
+        session=session
+    )
+    return Response({'message': 'Timer started', 'id': tracked_time.id})
+
+@api_view(['POST'])
+def stop_timer(request):
+    timer_id = request.data.get('id')
+    try:
+        tracked_time = TrackedTimeDB.objects.get(id=timer_id, user=request.user, endTime__isnull=True)
+        end_time = timezone.now()
+        tracked_time.endTime = end_time
+        tracked_time.duration = end_time - tracked_time.startTime
+        tracked_time.save()
+        return Response({'message': 'Timer stopped'})
+    except TrackedTimeDB.DoesNotExist:
+        return Response({'error': 'No active timer found'}, status=404)
+
+@api_view(['GET'])
+def get_active_timer(request):
+    try:
+        active_timer = TrackedTimeDB.objects.get(user=request.user, endTime__isnull=True)
+        return Response({
+            'id': active_timer.id,
+            'course': active_timer.course_id,
+            'topic': active_timer.topic_id,
+            'session': active_timer.session,
+            'startTime': active_timer.startTime.isoformat(),
+        })
+    except TrackedTimeDB.DoesNotExist:
+        return Response({'message': 'No active timer'}, status=404)

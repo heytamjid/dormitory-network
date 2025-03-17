@@ -13,7 +13,7 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 import firstApp.routing  # Replace 'your_app' with the app where your WebSocket routes will be
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myproject.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'DormitoryNetwork.settings')
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),  # Handles traditional HTTP requests

@@ -34,19 +34,17 @@ class Topic(models.Model):
 
     
     
-class TrackedTimeDB (models.Model):
-
+class TrackedTimeDB(models.Model):
     user = models.ForeignKey(myUserDB, on_delete=models.CASCADE, related_name='trackedTimeUnderUser')
     startTime = models.DateTimeField()
-    endTime = models.DateTimeField()
-    duration = models.DurationField()
-    course = models.ForeignKey(Course, on_delete=models.SET_NULL, null = True, default = None, related_name = 'trackedTimeUnderCourse' )
-    topic = models.ForeignKey(Topic, on_delete=models.SET_NULL, null = True, default = None, related_name = 'trackedTimeUnderTopic')
-    session = models.CharField(max_length=128, null = True, default = None)
-    
+    endTime = models.DateTimeField(null=True, blank=True)
+    duration = models.DurationField(null=True, blank=True)
+    course = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, related_name='trackedTimeUnderCourse')
+    topic = models.ForeignKey(Topic, on_delete=models.SET_NULL, null=True, blank=True, related_name='trackedTimeUnderTopic')
+    session = models.CharField(max_length=128, null=True, blank=True)
+
     def __str__(self):
-        return f"Session for {self.topic.name} ({self.start_time} to {self.end_time})"
-    
+        return f"Session for {self.topic.name if self.topic else 'No Topic'} ({self.startTime} to {self.endTime if self.endTime else 'ongoing'})"
 
 
     

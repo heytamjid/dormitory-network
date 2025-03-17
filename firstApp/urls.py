@@ -12,7 +12,7 @@ urlpatterns = [
     path('logout/', views.logoutFunc, name = "logout"),
     path('dashboard/', views.dashboard, name = "dashboard"),
     path('startTimerClicked/', views.start_timer, name = "startTimerClicked"),
-    path('endTimerClicked/', views.stop_timer, name = "endTimerClicked"),
+    path('endTimerClicked/', views.stop_timer_old, name = "endTimerClicked"),
     path('endTimerClicked/renderEntry/', views.renderEntry, name = "renderEntry"),
     path('add/course/', views.addCourse, name = "addCourse"),
     path('add/topic/', views.addTopic, name = "addTopic"),
@@ -37,6 +37,10 @@ urlpatterns = [
     path('api/topics/', views.TopicListView.as_view(), name='topic-list'),
     path('api/courses/<int:course_id>/topics/', views.TopicListView.as_view(), name='course-topics'),
     path('api/create/tracked-time/', views.TrackedTimeDBCreateView.as_view(), name='tracked-time-create'),
+
+    path('api/start-timer/', views.start_timer, name='start_timer'),
+    path('api/stop-timer/', views.stop_timer, name='stop_timer'),
+    path('api/get-active-timer/', views.get_active_timer, name='get_active_timer'),
     
     #path('api-token-auth/', views.obtain_auth_token),
     

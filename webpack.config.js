@@ -3,7 +3,7 @@ const path = require('path');
 module.exports = {
   entry: './assets/index.jsx',
   output: {
-    filename: 'index-bundle.jsx',
+    filename: 'index-bundle.js',
     path: path.resolve(__dirname, './static'),
   },
 
